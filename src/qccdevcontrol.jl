@@ -132,7 +132,10 @@ The function returns a named tuple consisting of:
 """
 function load(qdc           ::QCCDevCtrl,
               t             ::Time_t,
-              loading_zone  ::$OME_TYPE             )  ::Time_t
+              loading_zone  ::Any       )  ::@NamedTuple{new_ion_idx::Int,t₀::Time_t}
+
+# TODO: Replace `Any` by correct type
+
     @assert 0 ≤ t            ≤ qdc.t_now
     # ⟶  isallowed...:  @assert 1 ≤ loading_zone ≤ dev.num_loading_zones
 
@@ -141,7 +144,7 @@ function load(qdc           ::QCCDevCtrl,
     end
 
     local t₀ =
-        compute_end_time() ::Int64             # todo
+        compute_end_time() ::Time_t            # todo
 
 
     local new_ion_idx =
@@ -154,7 +157,7 @@ function load(qdc           ::QCCDevCtrl,
 
     qdc.t_now = t
 
-    return @NamedTuple(new_ion_idx, t₀)
+    return (new_ion_idx=new_ion_idx, t₀=t₀)
 end #^ module
 # EOF
 
