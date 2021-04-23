@@ -19,12 +19,7 @@ This sub-module provides the type `QCCDevCtrl` and functions for controlling the
 simulated quantum device.
 
 # Exported
-<<<<<<< HEAD
 * `QCCDevCtrl()`
-=======
-- Type `QCCDevCtrl` w/ constructor
-- Type `QCCDevCtrl__Operation_Not_Allowed_Exception`  subtype of `Exception`
->>>>>>> 77622819eab921e6ddc528f393c16010fe011c7c
 
 # Not Exported Interface
 - `load()`
