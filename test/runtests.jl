@@ -9,7 +9,7 @@ using LightGraphs
     @test_throws ArgumentError readJSON("./testFiles/wrongTopology.json")
 end
 
-@testset "QCCDevCtrl initialization" begin
+@testset "QCCDevControl initialization" begin
     @test QCCDevCtrlOKTest()
     @test nv(QCCDevCtrlTest().graph) == 5
     @test ne(QCCDevCtrlTest().graph) == 6
@@ -32,4 +32,12 @@ end
                                " wrong connected.") checkTrapsShuttleNotExistTest()
     @test_throws ArgumentError("Shuttle connected to trap ID 1 does not exist or is" * 
     " wrong connected.") checkTrapsShuttleWrongConnectedTest()
+end
+
+@testset "Load ions `load()`" begin
+    # Check time is okay
+    # Check error when time is not okay
+    # Check error max ions
+    # Check error not existing id 
+    # Check error loading hole is busy
 end

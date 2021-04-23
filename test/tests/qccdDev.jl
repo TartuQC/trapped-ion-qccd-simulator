@@ -1,6 +1,6 @@
 include("../utils/testUtils.jl")
 using qccdSimulator.QCCDevControl_Types
-using qccdSimulator.QCCDevControl
+using qccdSimulator.QCCDDevControl
 
 function readJSONOK(path::String)::Bool
     qccd1 = readJSON(path) 
@@ -45,8 +45,9 @@ function checkEqualQCCD(qccd1::QCCDevDescription, qccd2::QCCDevDescription):: Bo
     return true
 end
 
-function checkEqualQCCDevCtrl(qccdc1::QCCDevCtrl,qccdc2::QCCDevCtrl):: Bool
+function checkEqualQCCDevCtrl(qccdc1::QCCDevControl,qccdc2::QCCDevControl):: Bool
     @assert qccdc1.t_now == qccdc2.t_now
+    @assert qccdc1.max_capacity == qccdc2.max_capacity
     @assert checkEqualQCCD(qccdc1.dev, qccdc2.dev)
     @assert nv(qccdc1.graph) == nv(qccdc2.graph)
     @assert ne(qccdc1.graph) == ne(qccdc2.graph)
@@ -86,7 +87,7 @@ end
 
 function initTrapTest()
     trapDesc::TrapDesc = giveQccDes().trap
-    traps = qccdSimulator.QCCDevControl._initTraps(trapDesc)
+    traps = qccdSimulator.QCCDDevControl._initTraps(trapDesc)
     for (key, value) in traps
         @assert key == value.id
         @assert trapDesc.capacity == value.capacity
@@ -104,33 +105,33 @@ end
 
 function initTrapRepeatedIdTest()
     trapDesc::TrapDesc = giveTrapDescRepeatedId()
-    return qccdSimulator.QCCDevControl._initTraps(trapDesc)
+    return qccdSimulator.QCCDDevControl._initTraps(trapDesc)
 end
 
 function checkTrapsTest()
-    qdd::QCCDevCtrl = giveQccCtrl()
-    qccdSimulator.QCCDevControl._checkTraps(qdd.traps,qdd.shuttles)
+    qdd::QCCDevControl = giveQccCtrl()
+    qccdSimulator.QCCDDevControl._checkTraps(qdd.traps,qdd.shuttles)
     return true
 end
 
 function checkTrapsShuttleNotExistTest()
-    qdd::QCCDevCtrl = giveQccCtrl()
-    traps::Dict{Symbol,Trap} = qccdSimulator.QCCDevControl._initTraps(giveTrapDescNonShuttleId())
-    qccdSimulator.QCCDevControl._checkTraps(traps,qdd.shuttles)
+    qdd::QCCDevControl = giveQccCtrl()
+    traps::Dict{Symbol,Trap} = qccdSimulator.QCCDDevControl._initTraps(giveTrapDescNonShuttleId())
+    qccdSimulator.QCCDDevControl._checkTraps(traps,qdd.shuttles)
     return true
 end
 
 function checkTrapsShuttleWrongConnectedTest()
-    qdd::QCCDevCtrl = giveQccCtrl()
-    traps::Dict{Symbol,Trap} = qccdSimulator.QCCDevControl._initTraps(giveTrapDescWrongConnectedShuttle())
-    qccdSimulator.QCCDevControl._checkTraps(traps,qdd.shuttles)
+    qdd::QCCDevControl = giveQccCtrl()
+    traps::Dict{Symbol,Trap} = qccdSimulator.QCCDDevControl._initTraps(giveTrapDescWrongConnectedShuttle())
+    qccdSimulator.QCCDDevControl._checkTraps(traps,qdd.shuttles)
     return true
 end
 
 function initJunctionsTest()
     _typeSizes = Dict(:T => 3, :Y => 3, :X => 4)
     shuttles, _junctions = giveShuttlesJunctions(9, ["X", "Y", "T","X", "Y", "T","X", "Y", "T"])
-    junctions = qccdSimulator.QCCDevControl._initJunctions(shuttles, _junctions)
+    junctions = qccdSimulator.QCCDDevControl._initJunctions(shuttles, _junctions)
     for (k,junction) in junctions
         @assert k == junction.id
         juncType = filter(x-> Symbol(x.id)==k,_junctions)[1].type
@@ -148,32 +149,32 @@ end
 
 function initJunctionsTestRepId()
     shuttles, _junctions = giveShuttlesJunctions(2, ["T","T"];repJunc = true)
-    junctions = qccdSimulator.QCCDevControl._initJunctions(shuttles, _junctions)
+    junctions = qccdSimulator.QCCDDevControl._initJunctions(shuttles, _junctions)
 end
 
 function initJunctionsTestIsolated()
     shuttles, _junctions = giveShuttlesJunctions(2, ["T","T"];isolatedJunc = true)
-    junctions = qccdSimulator.QCCDevControl._initJunctions(shuttles, _junctions)
+    junctions = qccdSimulator.QCCDDevControl._initJunctions(shuttles, _junctions)
 end
 
 function initJunctionsTestWrongType()
     shuttles, _junctions = giveShuttlesJunctions(2, ["T","T"];wrongJuncType = true)
-    junctions = qccdSimulator.QCCDevControl._initJunctions(shuttles, _junctions)
+    junctions = qccdSimulator.QCCDDevControl._initJunctions(shuttles, _junctions)
 end
 
 function initShuttlesTestRepId()
     shuttles, _ = giveShuttlesJunctions(2, ["T","T"];repShuttle = true)
     shDesc = ShuttleDesc(shuttles)
-    qccdSimulator.QCCDevControl._initShuttles(shDesc)
+    qccdSimulator.QCCDDevControl._initShuttles(shDesc)
 end
 
 function initShuttlesTestInvShuttle()
-    qccdSimulator.QCCDevControl._initShuttles(giveShuttles(5;invShuttle=true))
+    qccdSimulator.QCCDDevControl._initShuttles(giveShuttles(5;invShuttle=true))
 end
 
 function initShuttlesTest()
     _shuttles = giveShuttles(10)
-    shuttles = qccdSimulator.QCCDevControl._initShuttles(_shuttles)
+    shuttles = qccdSimulator.QCCDDevControl._initShuttles(_shuttles)
     @assert length(_shuttles.shuttles) == length(shuttles)
     for _shuttle in _shuttles.shuttles
         shuttle = shuttles[Symbol(_shuttle.id)]
@@ -190,14 +191,14 @@ end
 
 function checkShuttlesTest()
     adj, shuttles = giveShuttlesAdjacency()
-    qccdSimulator.QCCDevControl._checkShuttles(adj, shuttles)
+    qccdSimulator.QCCDDevControl._checkShuttles(adj, shuttles)
     return true
 end
 
 function checkShuttlesTestMissingAdj()
     adj, shuttles = giveShuttlesAdjacency()
     try 
-        qccdSimulator.QCCDevControl._checkShuttles(delete!(adj, collect(keys(adj))[1]), shuttles)
+        qccdSimulator.QCCDDevControl._checkShuttles(delete!(adj, collect(keys(adj))[1]), shuttles)
     catch e
         @assert e.msg == "Number of elements in adjacency list and number of shuttles don't match"
     end
@@ -207,7 +208,7 @@ end
 function checkShuttlesTestMissingShuttle()
     adj, shuttles = giveShuttlesAdjacency()
     try 
-        qccdSimulator.QCCDevControl.
+        qccdSimulator.QCCDDevControl.
                         _checkShuttles(adj, delete!(shuttles, collect(keys(shuttles))[1]))
     catch e
         @assert e.msg == "Number of elements in adjacency list and number of shuttles don't match"
@@ -225,7 +226,7 @@ function checkShuttlesTestModifyConnections()
     _adj[k*"_"] = _adj[k] 
     delete!(_adj, k) # So there isn't a size mismatch
     try
-        qccdSimulator.QCCDevControl._checkShuttles(_adj, shuttles)
+        qccdSimulator.QCCDDevControl._checkShuttles(_adj, shuttles)
     catch e
         @assert startswith(e.msg, "Ends don't correspond to adjacency in shuttle ID")
     end
@@ -235,7 +236,7 @@ function checkShuttlesTestModifyConnections()
     _adj = deepcopy(adj)
     _adj[rand(keys(_adj))][1] = -1 
     try
-        qccdSimulator.QCCDevControl._checkShuttles(_adj, shuttles)
+        qccdSimulator.QCCDDevControl._checkShuttles(_adj, shuttles)
     catch e
         @assert startswith(e.msg, "Ends don't correspond to adjacency in shuttle ID")
     end
@@ -244,7 +245,7 @@ function checkShuttlesTestModifyConnections()
     # An end0 is going to be wrong
     adj, shuttles = giveShuttlesAdjacency(;faultyEnd0=true)
     try
-        qccdSimulator.QCCDevControl._checkShuttles(adj, shuttles)
+        qccdSimulator.QCCDDevControl._checkShuttles(adj, shuttles)
     catch e
         @assert startswith(e.msg, "Ends don't correspond to adjacency in shuttle ID")
     end
@@ -252,7 +253,7 @@ function checkShuttlesTestModifyConnections()
     # An end1 is going to be wrong
     adj, shuttles = giveShuttlesAdjacency(;faultyEnd1=true)
     try
-        qccdSimulator.QCCDevControl._checkShuttles(adj, shuttles)
+        qccdSimulator.QCCDDevControl._checkShuttles(adj, shuttles)
     catch e
         @assert startswith(e.msg, "Ends don't correspond to adjacency in shuttle ID")
     end

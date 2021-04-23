@@ -19,6 +19,14 @@ The following attribute exists to represent to which shuttle an end of a junctio
 "end0": ""
 "end1": "s1"
 
+This attribute indicate if the trap has gate zone or not, it's represented by a boolean.
+``` gate: Boolean ```
+"gate: true"
+
+This attribute indicate if the trap has loading zone or not, it's represented by a boolean.
+``` loading_zone: Boolean ```
+"loading_zone: true"
+
 This would mean that end0 is not connected to any junction, while end1 is connected to shuttle with id "s1".
 ```
 
