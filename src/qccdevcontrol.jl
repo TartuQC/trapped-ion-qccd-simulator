@@ -22,10 +22,12 @@ simulated quantum device.
 * `QCCDevCtrl()`
 
 # Not Exported Interface
-* `load()`
-* `linear_transport()`, `junction_transport()`,
-* `swap()`
-* `Rz()`, `Rxy()`, `XX()`, `ZZ()`
+- `load()`
+- `linear_transport()`, `junction_transport()`,
+- `swap()`
+- `Rz()`, `Rxy()`, `XX()`, `ZZ()`
+
+
 
 # Todo
 * Visualization interface
@@ -95,19 +97,38 @@ Function `load()` — loads an ion into the device
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 
-The function returns the time at which the operation will be completed.
+The function returns a named tuple consisting of:
+- `new_ion_idx` — the index identifying the new ion
+- `t₀` — the time at which the loaded ion will be usable (for transport off the loading zone);
 """
 function load(qdc           ::QCCDevControl,
               t             ::Time_t,
-              loading_hole  ::Int       )  ::Time_t
-    _time_check(qdc.t_now)
-    @assert 1 ≤ loading_hole ≤ dev.num_loading_holes
-    _load_checks()                      # todo
-    # local t_end = compute_end_time()   # todo
-    modify_status()                    # todo
+              loading_zone  ::Any       )  ::@NamedTuple{new_ion_idx::Int,t₀::Time_t}
+
+# TODO: Replace `Any` by correct type
+
+    @assert 0 ≤ t            ≤ qdc.t_now
+    # ⟶  isallowed...:  @assert 1 ≤ loading_zone ≤ dev.num_loading_zones
+
+    if ! isallowed_load(qdc, t, loading_zone)
+        throw(QCCDevCtrl__Operation_Not_Allowed_Exception())
+    end
+
+    local t₀ =
+        compute_end_time() ::Time_t            # todo
+
+
+    local new_ion_idx =
+        do_the_work()  ::Int
+
+    @assert t₀ > t                             "Something went horribly wrong: Time has stopped!"
+    @assert new_ion_idx > 0                    "New ion index is ≤ 0 WTF!"
+
+    modify_status()                            # todo
 
     qdc.t_now = t
-    return 0 # t_end
+
+    return (new_ion_idx=new_ion_idx, t₀=t₀)
 end #^ module
 # EOF
 

@@ -12,17 +12,25 @@ struct OperationNotAllowedException <: Exception
   msg ::String
 end
 """
+Default error message for QCCD operations.
+"""
+struct OperationNotAllowedException <: Exception
+  msg ::String
+end
+
+"""
 Function `time_check()` — checks if given time is correct
 
 # Arguments
-* `qdc:: TIme_t` — Actual qdc device's time.
+* `qdc:: Time_t` — Actual qdc device's time.
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 
 The function throws an error if time is not correct.
 """
 _time_check(t_qdc:: Time_t, t::Time_t) = begin
-  t_qdc.t_now ≤ t  || throw(ArgumentError("Time must be higher than $(t_qdc.t_now)"))
+  t_qdc.t_now ≤ t  || 
+    throw(OperationNotAllowedException("Time must be higher than $(t_qdc.t_now)"))
 end
 
 
