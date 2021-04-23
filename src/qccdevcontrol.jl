@@ -17,19 +17,22 @@ This sub-module provides the type `QCCDevCtrl` and functions for controlling the
 simulated quantum device.
 
 # Exported
-* Type `QCCDevCtrl` w/ constructor
+- Type `QCCDevCtrl` w/ constructor
+- Type `QCCDevCtrl__Operation_Not_Allowed_Exception`  subtype of `Exception`
 
 # Not Exported Interface
-* `load()`
-* `linear_transport()`, `junction_transport()`,
-* `swap()`
-* `Rz()`, `Rxy()`, `XX()`, `ZZ()`
+- `load()`
+- `linear_transport()`, `junction_transport()`,
+- `swap()`
+- `Rz()`, `Rxy()`, `XX()`, `ZZ()`
+
+
 
 # Todo
 * Visualization interface
 """
 
-
+struct QCCDevCtrl__Operation_Not_Allowed_Exception end
 
 """
 Type for time inside the qdev, in [change if necessary]   10^{-10}
@@ -46,7 +49,7 @@ struct QCCDevCtrl
 
     t_now          ::Time_t
 # Descomment when load() function is done
-#    qubits      ::Dict{String,Qubit}
+#    qubits      ::Dict{Int,Qubit}
     traps          ::Dict{Symbol,Trap}
     junctions      ::Dict{Symbol,Junction}
     shuttles       ::Dict{Symbol,Shuttle}
@@ -81,8 +84,8 @@ Currently none.  Possible:
 """
 function QCCDevCtrl(qdd             ::QCCDevDescription
                     ;
-                    simulate        ::Symbol
-                    qnoise_estimate ::Bool             ) ::QCCDevCtrl
+                    simulate=:No        ::Symbol,
+                    qnoise_estimate=false ::Bool             ) ::QCCDevCtrl
 
     @assert simulate        ∈ [:No, :PureStates, :MixedStates]
     @assert qnoise_estimate ∈ [true,false] # 😃
@@ -123,21 +126,35 @@ Function `load()` — loads an ion into the device
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 
-The function returns the time at which the operation will be completed.
+The function returns a named tuple consisting of:
+- `new_ion_idx` — the index identifying the new ion
+- `t₀` — the time at which the loaded ion will be usable (for transport off the loading zone);
 """
 function load(qdc           ::QCCDevCtrl,
               t             ::Time_t,
-              loading_hole  ::Int       )  ::Time_t
+              loading_zone  ::$OME_TYPE             )  ::Time_t
     @assert 0 ≤ t            ≤ qdc.t_now
-    @assert 1 ≤ loading_hole ≤ dev.num_loading_holes
+    # ⟶  isallowed...:  @assert 1 ≤ loading_zone ≤ dev.num_loading_zones
 
-    more_checks()                      # todo
-    local t_end =
-        compute_end_time()             # todo
-    modify_status()                    # todo
+    if ! isallowed_load(qdc, t, loading_zone)
+        throw(QCCDevCtrl__Operation_Not_Allowed_Exception())
+    end
+
+    local t₀ =
+        compute_end_time() ::Int64             # todo
+
+
+    local new_ion_idx =
+        do_the_work()  ::Int
+
+    @assert t₀ > t                             "Something went horribly wrong: Time has stopped!"
+    @assert new_ion_idx > 0                    "New ion index is ≤ 0 WTF!"
+
+    modify_status()                            # todo
 
     qdc.t_now = t
-    return t_end
+
+    return @NamedTuple(new_ion_idx, t₀)
 end #^ module
 # EOF
 
