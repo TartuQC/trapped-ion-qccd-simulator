@@ -11,8 +11,8 @@ Function `time_check()` — checks if given time is correct
 
 The function throws an error if time is not correct.
 """
-time_check(qdc:: QCCDevCtrl, t::T_time) = begin
-    dc.t_now ≤ t  || throw(ArgumentError("Time must be higher than $(qdc.t_now)"))
+time_check(t_qdc:: Time_t, t::Time_t) = begin
+  t_qdc.t_now ≤ t  || throw(ArgumentError("Time must be higher than $(t_qdc.t_now)"))
 end
 
 

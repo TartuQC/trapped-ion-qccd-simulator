@@ -40,7 +40,7 @@ const Time_t = Int64
 
 struct QCCDevCtrl
     dev         ::QCCDevDescription
-
+    max_capacity::Int64
     t_now       ::Time_t
 # Descomment when load() function is done
 #    qubits      ::Dict{String,Qubit}
@@ -72,19 +72,18 @@ Constructor; initializes an "empty" QCCD as described, with no ions loaded (yet)
 
 """
 function QCCDevCtrl(qdd::QCCDevDescription ; simulate::Bool)::QCCDevCtrl
-    dev   = qdd
-    t_now = 0
     # Initializes devices componentes
     junctions = _initJunctions(qdd.shuttle.shuttles, qdd.junction.junctions)
     shuttles = _initShuttles(qdd.shuttle)
     traps = _initTraps(qdd.trap)
     graph = initGraph(qdd)
-
+    max_capacity = reduce(+,map(tr -> tr.capacity,collect(values(traps))))
+    
     # Check errors
     _checkInitErrors(qdd.adjacency.nodes, traps, shuttles)
 
     # Initalizate QCCDevCtrl
-    return QCCDevCtrl(qdd,t_now,traps,junctions,shuttles, graph)
+    return QCCDevCtrl(qdd, max_capacity,0,traps,junctions,shuttles, graph)
 
     # Simulate
 end
