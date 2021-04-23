@@ -7,7 +7,7 @@
 ### Place in the software
 - Created by "Mapping-Shuttling-Scheduling"
 - Consumed by "Run", where the individual operations for the
-  HW/Simu/RE are issued
+n  HW/Simu/RE are issued
 
 ### Design goal
 - Simple!  It's the output of a function that will be adapted by
@@ -28,6 +28,16 @@ module Schedule
 using .QCCDevDes_Types: QCCDevDescription
 using .QCCDevStatFeasible
 using .QCCDevCtrl
+
+#
+# These are temporary: When the types are available in
+# "qccdevcontrol.jl", they will be `using'`d from there.
+#
+const QubitIdx    = Int32
+const Edge_t      = Int32
+const LoadZone_t  = Int32
+const GateZone_t  = Int32
+
 
 #------------------------------------------------------------------------------------------
 
@@ -77,8 +87,8 @@ Struct `XX_t` — $e^{-i\pi\theta X₁\otimes X₂$ ...
 Subtype of `U_Oper_type`.
 """
 struct XX_t <: U_Oper_type
-    q₁ ::Int32
-    q₂ ::Int32
+    q₁ ::QubitIdx
+    q₂ ::QubitIdx
     θ  ::Float32
 end
 
@@ -89,8 +99,8 @@ Struct `ZZ_t` — $e^{-i\pi\theta Z₁\otimes Z₂$ ...
 Subtype of `U_Oper_type`.
 """
 struct ZZ_t <: U_Oper_type
-    q₁ ::Int32
-    q₂ ::Int32
+    q₁ ::QubitIdx
+    q₂ ::QubitIdx
     θ  ::Float32
 end
 
@@ -100,7 +110,7 @@ Struct `Rz_t` — 𝑍-axis Pauli rotation
 Subtype of `U_Oper_type`.
 """
 struct Rz_t <: U_Oper_type
-    q  ::Int32
+    q  ::QubitIdx
     θ  ::Float32
 end
 
@@ -112,7 +122,7 @@ Struct `Rxy_t` — Bloch sphere rotation
 Subtype of `U_Oper_type`.
 """
 struct Rxy_t <: U_Oper_type
-    q ::Int32
+    q ::QubitIdx
     θ ::Float32
     ϕ ::Float64
 end
@@ -124,23 +134,109 @@ end
 #------------------------------------------------------------------------------------------
 
 """
-Struct `Rxy_t` — Bloch sphere rotation
+Struct `Load_t` — load ion operation
 
-... with angle θ around the axis cosϕ ⋅ 𝑋 + sinϕ ⋅ 𝑌
+... subtype of `S_Oper_type`.
 
-Subtype of `U_Oper_type`.
+(Note that the HW returns its own ion ID (of type `Int`), and that
+that has to be mapped to the `q` field in the `Load_t` struct.)
 """
 struct Load_t <: S_Oper_type
-    q    ::Int32
-    zone ::Float32
+    q    ::QubitIdx
+    zone ::LoadZone_t
 end
 
+"""
+Struct `LinMove_t` — linear transport operation
 
+... subtype of `S_Oper_type`.
 
+"""
+struct LinMove_t <: S_Oper_type
+    q    ::QubitIdx
+    edge ::Edge_t
+end
+
+"""
+Struct `JunctionMove_t` — linear transport operation
+
+... subtype of `S_Oper_type`.
+
+"""
+struct JunctionMove_t <: S_Oper_type
+    q    ::QubitIdx
+    edge ::Edge_t
+end
+
+"""
+Struct `IonSwap_t` — ion-swap operation
+
+... subtype of `S_Oper_type`.
+
+"""
+struct IonSwap_t <: S_Oper_type
+    q₁  ::QubitIdx
+    q₂  ::QubitIdx
+end
+
+"""
+Struct `Split_t` — split ion off from gate zone
+
+... subtype of `S_Oper_type`.
+
+"""
+struct Split_t <: S_Oper_type
+    q    ::QubitIdx
+    zone ::GateZone_t
+end
+
+"""
+Struct `Merge_t` — merge ion into gate zone
+
+... subtype of `S_Oper_type`.
+
+"""
+struct Merge_t <: S_Oper_type
+    q    ::QubitIdx
+    zone ::GateZone_t
+end
 
 #------------------------------------------------------------------------------------------
 #
-# 
+# Measurement Operations
+#
+#------------------------------------------------------------------------------------------
+
+"""
+Struct `Measure_t` — measure ion
+
+... subtype of `M_Oper_type`.
+
+"""
+struct Measure_t <: M_Oper_type
+    q ::QubitIdx
+end
+
+#------------------------------------------------------------------------------------------
+#
+# Classical Control Operations
+#
+#------------------------------------------------------------------------------------------
+
+"""
+Struct `Switch_t` — C-style switch-case statement
+
+... subtype of `C_Oper_type`.
+
+"""
+struct Switch_t <: M_Oper_type
+    q      ::Array{QubitIdx,1}
+    case   ::Array{OpData,1}
+end
+
+#------------------------------------------------------------------------------------------
+#
+#
 #
 #------------------------------------------------------------------------------------------
 
