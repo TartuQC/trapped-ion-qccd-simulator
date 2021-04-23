@@ -189,5 +189,5 @@ function giveQccCtrl()::QCCDevControl
         end
     end
     max_capacity = reduce(+,map(tr -> tr.capacity,collect(values(traps))))
-    return QCCDevControl(qccd, max_capacity, traps,junctions,shuttles, graph)
+    return QCCDevControl(qccd, max_capacity,:No, false, traps, junctions, shuttles, graph)
 end

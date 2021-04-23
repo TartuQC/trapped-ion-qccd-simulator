@@ -35,19 +35,40 @@ simulated quantum device.
 ####################################################################################################
 
 """
-Function `QCCDevCtrl(::QCCDevDescription ; simulate::Bool, 𝑜𝑝𝑡𝑖𝑜𝑛𝑠)`
+Function `QCCDevCtrl(::QCCDevDescription ; simulate::Symbol, 𝑜𝑝𝑡𝑖𝑜𝑛𝑠)`
 
 Constructor; initializes an "empty" QCCD as described, with no ions loaded (yet).
 
 # Arguments
 
-* `simulate` — If `simulate` is true, quantum circuit simulation is performed.
+- `simulate::Symbol` — one of `:No`, `:PureStates`, `:MixedStates`
+- `qnoise_estimate::Bool` — whether estimation of noise takes place
+
+Setting both `simulate=:No` and `qnoise_estimate=false` allows
+feasibility check of a schedule.
 
 ## Options:
-* Currently none
-
+Currently none.  Possible:
+- Modify default noise model (in case of `:MixedStates` simulation
+- Modify default qnoise parameters
 """
-function QCCDevCtrl(qdd::QCCDevDescription ; simulate::Bool)::QCCDevControl
+function QCCDevCtrl(qdd             ::QCCDevDescription
+                    ;
+                    simulate=:No        ::Symbol,
+                    qnoise_estimate=false ::Bool             ) ::QCCDevControl
+
+    @assert simulate        ∈ [:No, :PureStates, :MixedStates]
+    @assert qnoise_estimate ∈ [true,false] # 😃
+
+    #-------------------------------------------------------------------#
+    # TODO                                                              #
+    #                                                                   #
+    # Check whether simulation resources are sufficient to accommodate  #
+    # the number of qubits (in pure states, mixed states, or tensor     #
+    # network (cuQuantum) simulation)                                   #
+    #                                                                   #
+    #-------------------------------------------------------------------#
+
     # Initializes devices componentes
     junctions = _initJunctions(qdd.shuttle.shuttles, qdd.junction.junctions)
     shuttles = _initShuttles(qdd.shuttle)
@@ -59,10 +80,11 @@ function QCCDevCtrl(qdd::QCCDevDescription ; simulate::Bool)::QCCDevControl
     _checkInitErrors(qdd.adjacency.nodes, traps, shuttles)
 
     # Initalizate QCCDevCtrl
-    return QCCDevControl(qdd, max_capacity, traps, junctions, shuttles, graph)
-
-    # Simulate
-end
+    return QCCDevControl(qdd,
+                      max_capacity,
+                      simulate, qnoise_estimate,
+                      traps,junctions,shuttles, graph)
+end #^ QCCDevCtrl()
 
 ####################################################################################################
 

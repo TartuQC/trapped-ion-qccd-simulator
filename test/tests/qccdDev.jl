@@ -10,7 +10,7 @@ end
 
 function QCCDevCtrlOKTest()::Bool
     qccd1 = giveQccCtrl()
-    qccd2 = QCCDevCtrl(giveQccDes();simulate=false)
+    qccd2 = QCCDevCtrl(giveQccDes())
     return checkEqualQCCDevCtrl(qccd1,qccd2)
 end
 
@@ -186,7 +186,7 @@ end
 
 function QCCDevCtrlTest()
     qdd::QCCDevDescription = giveQccDes()
-    return QCCDevCtrl(qdd; simulate=false)
+    return QCCDevCtrl(qdd)
 end
 
 function checkShuttlesTest()
