@@ -4,10 +4,13 @@
 # Sub-module QCCDevCtrl
 
 module QCCDev_Feasible
-export load_checks
+export load_checks, isallowed_loadingHole_transport
 
 using ..QCCDevControl_Types
 
+struct OperationNotAllowedException <: Exception
+  msg ::String
+end
 """
 Function `time_check()` — checks if given time is correct
 
@@ -27,6 +30,25 @@ function  load_checks()
     # TODO Check loading_hole exist and its not busy
     # TODO Check ion number not exceeds device capacity trampa
     
+end
+
+function  isallowed_loadingHole_transport(qdc           :: QCCDevControl,
+                                          t             :: Time_t,
+                                          ion_idx       :: Int,
+                                          trap_idx      :: Symbol       ):: Bool
+
+  ion_idx ∈ keys(qdc.qubits) ||
+          throw(OperationNotAllowedException("Ion with ID $ion_idx is not in device"))
+
+  trap_idx ∈ keys(qdc.traps) ||
+          throw(OperationNotAllowedException("Trap with ID $ion_idx is not in device"))
+
+  (qdc.qubits[ion_idx].status == :inLoadingZone && 
+    qdc.traps[trap_idx].loading_hole[2] == ion_idx) ||
+          throw(OperationNotAllowedException("Ion is not in trap's loading zone"))
+  
+  
+
 end
 
 end

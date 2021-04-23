@@ -144,7 +144,7 @@ Function `loadingHole_transport()` — moves ions from loading holes to gate zon
 
 The function returns the time at which the operation will be completed.
 """
-function loadingHole_transport(qdc           :: QCCDevCtrl,
+function loadingHole_transport(qdc           :: QCCDevControl,
                           t             :: Time_t,
                           ion_idx       :: Int,
                           trap_idx      :: Int       ) ::Time_t
