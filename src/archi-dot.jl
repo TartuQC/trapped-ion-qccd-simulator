@@ -5,8 +5,8 @@
 ## 3. Schedule data structure
 
 ### Place in the software
-- created by "Mapping-Shuttling-Scheduling"
-- consumed by "Run", where the individual operations for the
+- Created by "Mapping-Shuttling-Scheduling"
+- Consumed by "Run", where the individual operations for the
   HW/Simu/RE are issued
 
 ### Design goal
@@ -16,14 +16,22 @@
   functions)
 
 ### Content
-- refers to one instance of QCCDevDescription
-- all hw-gates & measurements (on ions) with scheduled times
-- all shuttling operations with scheduled times
+- Refers to one instance of QCCDevDescription
+- All hw-gates & measurements (on ions) with scheduled times
+- All shuttling operations with scheduled times
 
 ### Functions
 - checkFeasible()
-- 
-
-
-
 """
+module Schedule
+
+using .QCCDevDes_Types: QCCDevDescription
+using .QCCDevStatFeasible
+using .QCCDevCtrl
+
+
+
+
+
+end #^ module Schedule
+#EOF
