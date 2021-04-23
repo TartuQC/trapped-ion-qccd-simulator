@@ -24,8 +24,8 @@ const Time_t = Int64
 
 """
 Struct for junction end.
-queue: Array of qubits waiting in the junction end (if any) 
-status: Status of the junction end, either free (queue is empty) or blocked otherwise
+    - queue: Array of qubits waiting in the junction end (if any) 
+    - status: Status of the junction end, either free (queue is empty) or blocked otherwise
 """
 struct JunctionEnd
     qubit::Union{Nothing,Int}
@@ -40,9 +40,9 @@ end
 
 """
 Struct for junction.
-id: Junction ID.
-type: Type of the junction. Each type may define how the junction works differently
-ends: Dict with key being the shuttle ID the junction is connected to and value a JunctionEnd
+    - id: Junction ID.
+    - type: Type of the junction. Each type may define how the junction works differently
+    - ends: Dict with key being the shuttle ID the junction is connected to and value a JunctionEnd
 Throws ArgumentError if junction type doesn't match with number of ends.
 """
 struct Junction
@@ -61,14 +61,14 @@ end
 
 """  
 Struct for the qubits.
-id: qubit ID 
-status: current qubit status
-    - moving
-    - resting
-    - waitingDecongestion
-    - gateApplied
-position: current qubit position
-destination: qubit destination, it could not have any
+    - id: qubit ID 
+    - status: current qubit status
+        - moving
+        - resting
+        - waitingDecongestion
+        - gateApplied
+    - position: current qubit position
+    - destination: qubit destination, it could not have any
 """
 struct Qubit
     id::Int
@@ -84,8 +84,8 @@ end
 
 """  
 Struct for the shuttles.
-id: shuttle ID 
-end0 & end1: ID of components they are connected to
+    - id: shuttle ID 
+    - end0 & end1: ID of components they are connected to
 Throws ArgumentError if 'end0' and 'end1' are the same
 """
 struct Shuttle
@@ -99,8 +99,8 @@ end
 
 """  
 Struct for the trap endings.
-qubit: qubit id in that ending 
-shuttle: shuttle id the ending is connected
+    - qubit: qubit id in that ending 
+    - shuttle: shuttle id the ending is connected
 """
 struct TrapEnd
     qubit::Union{Int, Nothing}
@@ -111,11 +111,11 @@ end
 
 """  
 Struct for the traps.
-id: trap identifier
-capacity: maximum qubits in the trap 
-chain: Ordered Qubits in the trap (from end0 to end1)
-end0 & end1: Trap endings
-Throws ArgumentError if length(chain) > capacity
+    - id: trap identifier
+    - capacity: maximum qubits in the trap 
+    - chain: Ordered Qubits in the trap (from end0 to end1)
+    - end0 & end1: Trap endings
+    - Throws ArgumentError if length(chain) > capacity
 """
 struct Trap
     id::Symbol
@@ -129,12 +129,24 @@ struct Trap
                         new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
 end
 
+"""
+Struct for the Device control.
+    - dev: device's topology
+    - max_capacity: maximum ion device's capacity
+    - simulate: one of `:No`, `:PureStates`, `:MixedStates`
+    - qnoise_esimate: whether estimation of noise takes place
+    - t_now: current device's time, when starting equal to zero
+    - qubits: current qubits' status of the device
+    - traps: current traps' status of the device
+    - shuttles: current shuttles' status of the device
+    - graph: topology's graph 
+"""
 struct QCCDevControl
     dev         ::QCCDevDescription
     max_capacity::Int64
 
-    simulate       ::Symbol                   # one of `:No`, `:PureStates`, `:MixedStates`
-    qnoise_esimate ::Bool                     # whether estimation of noise takes place
+    simulate       ::Symbol                   
+    qnoise_esimate ::Bool                     
 
     t_now       ::Time_t
 # Descomment when load() function is done
