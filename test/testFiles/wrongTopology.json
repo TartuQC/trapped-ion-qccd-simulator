@@ -25,17 +25,23 @@
             {
                 "id": 1,
                 "end0": "",
-                "end1": "s1"
+                "end1": "s1",
+                "gate": true,
+                "loading_zone": true
             },
             {
                 "id": 2,
                 "end0": "s3",
-                "end1": ""
+                "end1": "",
+                "gate": false,
+                "loading_zone": true
             },
             {
                 "id": 3,
                 "end0": "s6",
-                "end1": ""
+                "end1": "",
+                "gate": true,
+                "loading_zone": false
             }
         ]
     },

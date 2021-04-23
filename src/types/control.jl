@@ -5,7 +5,7 @@ export QubitStatus, typesSizes
 using LightGraphs
 
 # Possible Qubits Status
-const QubitStatus = Set([:resting, :moving, :waitingDecongestion, :gateApplied])
+const QubitStatus = Set([:inLoadingZone, :inGateZone])
 
 # Possible junction status
 const JunctionEndStatus = Set([:free, :blocked])
@@ -115,10 +115,10 @@ struct Trap
     chain::Array{Symbol}
     end0::TrapEnd
     end1::TrapEnd
-    Trap(id, capacity, end0, end1) = new(id, capacity, [], end0, end1)
-    Trap(id, capacity, chain, end0, end1) = capacity < length(chain) ? 
-        throw(ArgumentError("Trap with id \"$id\" exceeds its capacity")) :
-        new(id, capacity, chain, end0, end1)
+    gate::Bool
+    loading_hole::Tuple{Bool, Union{Symbol, Nothing}}
+    Trap(id, capacity, end0, end1, gate, holeBool) =
+                        new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
 end
 
 end

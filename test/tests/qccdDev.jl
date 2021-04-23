@@ -24,6 +24,8 @@ function checkEqualQCCD(qccd1::QCCDevDescription, qccd2::QCCDevDescription):: Bo
         @assert trap1.id == trap2.id
         @assert trap1.end0 == trap2.end0
         @assert trap1.end1 == trap2.end1
+        @assert trap1.gate == trap2.gate
+        @assert trap1.loading_zone == trap2.loading_zone
     end
     juns1 = qccd1.junction.junctions
     juns2 = qccd2.junction.junctions
@@ -60,6 +62,8 @@ function checkEqualQCCDevCtrl(qccdc1::QCCDevCtrl,qccdc2::QCCDevCtrl):: Bool
         @assert qccdc2.traps[key].end0.shuttle == value.end0.shuttle
         @assert qccdc2.traps[key].end1.qubit == value.end1.qubit
         @assert qccdc2.traps[key].end1.shuttle == value.end1.shuttle
+        @assert qccdc2.traps[key].gate == value.gate
+        @assert qccdc2.traps[key].loading_hole == value.loading_hole
     end
     for (key,value) in qccdc1.shuttles
         @assert haskey(qccdc2.shuttles, key)

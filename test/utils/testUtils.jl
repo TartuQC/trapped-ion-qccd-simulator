@@ -56,7 +56,7 @@ function giveShuttles(nShuttles:: Int64;  invShuttle=false)::ShuttleDesc
     return ShuttleDesc(shuttles)
 end
 
-"""
+""" 
 Creates a struct QCCDevDescription based in the file topology.json
 """
 function giveQccDes()::QCCDevDescription
@@ -66,9 +66,9 @@ function giveQccDes()::QCCDevDescription
     trap:: TrapDesc = TrapDesc(
         3,
         [ 
-            TrapInfoDesc( 1, "", "s1"),
-            TrapInfoDesc( 2, "s3", ""),
-            TrapInfoDesc( 3, "s6", "")
+            TrapInfoDesc( 1, "", "s1", true, true),
+            TrapInfoDesc( 2, "s3", "", false, true),
+            TrapInfoDesc( 3, "s6", "", true, false)
         ]
     )
     junction:: JunctionDesc = JunctionDesc(
@@ -127,9 +127,9 @@ function giveTrapDescRepeatedId()::TrapDesc
     return TrapDesc(
         3,
         [ 
-            TrapInfoDesc( 1, "", "s1"),
-            TrapInfoDesc( 2, "s3", ""),
-            TrapInfoDesc( 1, "s6", "")
+            TrapInfoDesc( 1, "", "s1", false, true),
+            TrapInfoDesc( 2, "s3", "", true, true),
+            TrapInfoDesc( 1, "s6", "", true, true)
         ]
     )
 end
@@ -141,9 +141,9 @@ function giveTrapDescNonShuttleId()::TrapDesc
     return TrapDesc(
         3,
         [ 
-            TrapInfoDesc( 1, "", "s1"),
-            TrapInfoDesc( 2, "s100", ""),
-            TrapInfoDesc( 3, "s6", "")
+            TrapInfoDesc( 1, "", "s1", false, true),
+            TrapInfoDesc( 2, "s100", "", true, true),
+            TrapInfoDesc( 3, "s6", "", true, true)
         ]
     )
 end
@@ -155,9 +155,9 @@ function giveTrapDescWrongConnectedShuttle()::TrapDesc
     return TrapDesc(
         3,
         [ 
-            TrapInfoDesc( 1, "s5", "s1"),
-            TrapInfoDesc( 2, "s3", ""),
-            TrapInfoDesc( 3, "s6", "")
+            TrapInfoDesc( 1, "s5", "s1", false, true),
+            TrapInfoDesc( 2, "s3", "", true, true),
+            TrapInfoDesc( 3, "s6", "", true, true)
         ]
     )
 end
@@ -170,8 +170,8 @@ function giveQccCtrl()::QCCDevCtrl
     qccd::QCCDevDescription = giveQccDes()
     traps = Dict{Symbol,Trap}()
     map(tr -> traps[Symbol(tr.id)] = Trap(Symbol(tr.id), qccd.trap.capacity,
-                              TrapEnd(Symbol(tr.end0)), TrapEnd(Symbol(tr.end1))),
-              qccd.trap.traps)
+                              TrapEnd(Symbol(tr.end0)), TrapEnd(Symbol(tr.end1))
+                              , tr.gate, tr.loading_zone), qccd.trap.traps)
     shuttles = Dict{Symbol,Shuttle}()
     map(sh -> shuttles[Symbol(sh.id)] = Shuttle(Symbol(sh.id), Symbol(sh.end0), Symbol(sh.end1)),
               qccd.shuttle.shuttles)

@@ -8,6 +8,8 @@ struct TrapInfoDesc
     id:: Int64
     end0:: String
     end1:: String
+    gate:: Bool
+    loading_zone:: Bool
 end
 
 struct TrapDesc

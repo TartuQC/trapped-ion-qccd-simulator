@@ -64,7 +64,8 @@ function _initTraps(trapDesc::TrapDesc)::Dict{Symbol,Trap}
 
     map(tr -> haskey(traps, Symbol(tr.id)) ? throw(err(tr.id)) :
               traps[Symbol(tr.id)] = Trap(Symbol(tr.id),trapDesc.capacity,
-                                        TrapEnd(Symbol(tr.end0)), TrapEnd(Symbol(tr.end1))),
+                                        TrapEnd(Symbol(tr.end0)), TrapEnd(Symbol(tr.end1)),
+                                        tr.gate, tr.loading_zone),
               trapDesc.traps)
     return traps
 end
