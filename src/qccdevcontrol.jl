@@ -39,15 +39,18 @@ of this type are errors (and may carry local error information).
 const Time_t = Int64
 
 struct QCCDevCtrl
-    dev         ::QCCDevDescription
+    dev            ::QCCDevDescription
 
-    t_now       ::Time_t
+    simulate       ::Symbol                   # one of `:No`, `:PureStates`, `:MixedStates`
+    qnoise_esimate ::Bool                     # whether estimation of noise takes place
+
+    t_now          ::Time_t
 # Descomment when load() function is done
 #    qubits      ::Dict{String,Qubit}
-    traps       ::Dict{Symbol,Trap}
-    junctions   ::Dict{Symbol,Junction}
-    shuttles    ::Dict{Symbol,Shuttle}
-    graph       ::SimpleGraph{Int64}
+    traps          ::Dict{Symbol,Trap}
+    junctions      ::Dict{Symbol,Junction}
+    shuttles       ::Dict{Symbol,Shuttle}
+    graph          ::SimpleGraph{Int64}
 
     # Rest of struct contains description of current status of qdev
     # and its ions, such as the list of operations that are ongoing
@@ -59,19 +62,40 @@ end
 ####################################################################################################
 
 """
-Function `QCCDevCtrl(::QCCDevDescription ; simulate::Bool, 𝑜𝑝𝑡𝑖𝑜𝑛𝑠)`
+Function `QCCDevCtrl(::QCCDevDescription ; simulate::Symbol, 𝑜𝑝𝑡𝑖𝑜𝑛𝑠)`
 
 Constructor; initializes an "empty" QCCD as described, with no ions loaded (yet).
 
 # Arguments
 
-* `simulate` — If `simulate` is true, quantum circuit simulation is performed.
+- `simulate::Symbol` — one of `:No`, `:PureStates`, `:MixedStates`
+- `qnoise_estimate::Bool` — whether estimation of noise takes place
+
+Setting both `simulate=:No` and `qnoise_estimate=false` allows
+feasibility check of a schedule.
 
 ## Options:
-* Currently none
-
+Currently none.  Possible:
+- Modify default noise model (in case of `:MixedStates` simulation
+- Modify default qnoise parameters
 """
-function QCCDevCtrl(qdd::QCCDevDescription ; simulate::Bool)::QCCDevCtrl
+function QCCDevCtrl(qdd             ::QCCDevDescription
+                    ;
+                    simulate        ::Symbol
+                    qnoise_estimate ::Bool             ) ::QCCDevCtrl
+
+    @assert simulate        ∈ [:No, :PureStates, :MixedStates]
+    @assert qnoise_estimate ∈ [true,false] # 😃
+
+    #-------------------------------------------------------------------#
+    # TODO                                                              #
+    #                                                                   #
+    # Check whether simulation resources are sufficient to accommodate  #
+    # the number of qubits (in pure states, mixed states, or tensor     #
+    # network (cuQuantum) simulation)                                   #
+    #                                                                   #
+    #-------------------------------------------------------------------#
+
     dev   = qdd
     t_now = 0
     # Initializes devices componentes
@@ -84,10 +108,11 @@ function QCCDevCtrl(qdd::QCCDevDescription ; simulate::Bool)::QCCDevCtrl
     _checkInitErrors(qdd.adjacency.nodes, traps, shuttles)
 
     # Initalizate QCCDevCtrl
-    return QCCDevCtrl(qdd,t_now,traps,junctions,shuttles, graph)
-
-    # Simulate
-end
+    return QCCDevCtrl(qdd,
+                      simulate, qnoise_estimate,
+                      t_now,
+                      traps,junctions,shuttles, graph)
+end #^ QCCDevCtrl()
 
 ####################################################################################################
 
