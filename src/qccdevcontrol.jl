@@ -103,16 +103,14 @@ The function returns the time at which the operation will be completed.
 function load(qdc           ::QCCDevCtrl,
               t             ::Time_t,
               loading_hole  ::Int       )  ::Time_t
-    @assert 0 ≤ t            ≤ qdc.t_now
+    time_check(qdc)
     @assert 1 ≤ loading_hole ≤ dev.num_loading_holes
-
-    more_checks()                      # todo
-    local t_end =
-        compute_end_time()             # todo
+    load_checks()                      # todo
+    # local t_end = compute_end_time()   # todo
     modify_status()                    # todo
 
     qdc.t_now = t
-    return t_end
+    return 0 # t_end
 end #^ module
 # EOF
 
