@@ -32,6 +32,11 @@ using .QCCDevCtrl
 struct OpData
     op   :: DataType
     t₀   :: Int64         # start time of op
+
+    OpData(;
+           op   ::DataType,
+           t₀   ::Int64,
+           )
 end
 
 
