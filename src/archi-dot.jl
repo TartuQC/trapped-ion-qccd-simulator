@@ -29,6 +29,12 @@ using .QCCDevDes_Types: QCCDevDescription
 using .QCCDevStatFeasible
 using .QCCDevCtrl
 
+struct OpData
+    op   :: DataType
+    t₀   :: Int64         # start time of op
+end
+
+
 
 
 
