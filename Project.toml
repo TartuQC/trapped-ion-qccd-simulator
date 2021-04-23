@@ -1,11 +1,12 @@
 name = "qccdSimulator"
 uuid = "9ac1aeb4-acc6-4df6-9eeb-8eaa1e4456f1"
-authors = ["Hopery <anabel.ovide@gmail.com> and Alejandro <alexvilloria26@gmail.com>"]
+authors = ["Anabel Ovide <anabel.ovide@gmail.com>", "Alejandro Villoria <alexvilloria26@gmail.com>"]
 version = "0.1.0"
 
 [deps]
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StructTypes = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
 
 [compat]

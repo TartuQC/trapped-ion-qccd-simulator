@@ -44,8 +44,8 @@ struct Junction
     function Junction(id::Symbol, type::Symbol, ends::Dict{Symbol,JunctionEnd})
         type in JunctionType || throw(ArgumentError("Junction type $type not supported"))
         if length(ends) != typesSizes[type]
-            throw(ArgumentError("Junction with ID $id of type $type has $(length(ends)) ends.
-            It should have $(typesSizes[type]) ends."))
+            throw(ArgumentError("Junction with ID $id of type $type has $(length(ends)) ends." *
+            " It should have $(typesSizes[type]) ends."))
         end
         return new(id, type, ends)
     end
@@ -116,12 +116,9 @@ struct Trap
     end0::TrapEnd
     end1::TrapEnd
     gate::Bool
-    loading_hole::Bool
-    Trap(id, capacity, end0, end1, gate, loading_hole) = 
-                        new(id, capacity, [], end0, end1, gate, loading_hole)
-    Trap(id, capacity, chain, end0, end1, gate, loading_hole) = capacity < length(chain) ? 
-        throw(ArgumentError("Trap with id \"$id\" exceeds its capacity")) :
-        new(id, capacity, chain, end0, end1, gate, loading_hole)
+    loading_hole::Tuple{Bool, Union{Symbol, Nothing}}
+    Trap(id, capacity, end0, end1, gate, holeBool) =
+                        new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
 end
 
 end

@@ -30,7 +30,7 @@ function _initJunctions(shuttles::Array{ShuttleInfoDesc},
             junctions::Array{JunctionInfoDesc})::Dict{Symbol,Junction}
     res = Dict{Symbol,Junction}()
     for j ∈ junctions
-        !haskey(res, j.id) || throw(ArgumentError("Repeated junction ID: $(j.id)."))
+        !haskey(res, Symbol(j.id)) || throw(ArgumentError("Repeated junction ID: $(j.id)."))
 
         connectedShuttles = filter(x -> x.end0 == j.id || x.end1 == j.id, shuttles)
         isempty(connectedShuttles) && throw(ArgumentError("Junction with ID $(j.id) isolated."))
@@ -87,8 +87,8 @@ Throws an error if trapsEnds shuttles don't exists or don't correspond with Shut
 """
 function _checkTraps(traps::Dict{Symbol,Trap}, shuttles::Dict{Symbol,Shuttle})
 
-    err = trapId-> ArgumentError("Shuttle connected to trap ID $trapId does
-                                 not exist or is wrong connected.")
+    err = trapId-> ArgumentError("Shuttle connected to trap ID $trapId does "*
+                                 "not exist or is wrong connected.")
 
     check = (trEnd,trId) -> trEnd.shuttle isa Nothing || (haskey(shuttles, trEnd.shuttle) && 
                             trId in [shuttles[trEnd.shuttle].end0, shuttles[trEnd.shuttle].end1])
@@ -102,10 +102,16 @@ Throws an error if shuttle ends don't correspond JSON adjacency.
 """
 function _checkShuttles(adjacency:: Dict{String, Array{Int64}}, shuttles::Dict{Symbol,Shuttle})
 
-    errSh = shuttleId -> ArgumentError("Ends don't correspond to adjacency in shuttle 
-                                        ID $shuttleId.")
-    check = sh -> (haskey(adjacency,string(sh.end0)) && parse(Int,string(sh.end1)) in adjacency[string(sh.end0)]) ||
-                    (haskey(adjacency,string(sh.end1)) && parse(Int,string(sh.end0)) in adjacency[string(sh.end1)])
+    errSh = shuttleId -> ArgumentError("Ends don't correspond to adjacency in shuttle "*
+                                        "ID $shuttleId.")
+    length(shuttles) == sum(length, values(adjacency)) ||
+        throw(ArgumentError(
+            "Number of elements in adjacency list and number of shuttles don't match"))
+            
+    check = sh ->
+        (haskey(adjacency,string(sh.end0)) && parse(Int,string(sh.end1)) in adjacency[string(sh.end0)]) ||
+        (haskey(adjacency,string(sh.end1)) && parse(Int,string(sh.end0)) in adjacency[string(sh.end1)])
+
     map(sh ->  check(sh) || throw(errSh(sh.id)), values(shuttles))
 end
 
