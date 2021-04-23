@@ -139,6 +139,26 @@ end
 ####################################################################################################
 
 """
+Function `loadingHole_transport()` — moves ions from loading holes to gate zones.
+
+# Arguments
+* `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
+  given to previous function calls.
+* `ion_idx`   — index (1-based) of ion to be moved.
+* `edge-idx`  — index (1-based) of edge to move along.
+
+The function returns the time at which the operation will be completed.
+"""
+function loadingHole_transport(qdc           :: QCCDevCtrl,
+                          t             :: Time_t,
+                          ion_idx       :: Int,
+                          trap_idx      :: Int       ) ::Time_t
+    
+end
+
+####################################################################################################
+
+"""
 Function `junction_transport()` — moves around a junction.
 
 # Arguments
