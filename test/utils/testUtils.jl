@@ -188,5 +188,5 @@ function giveQccCtrl()::QCCDevCtrl
             add_edge!(graph, parse(Int64, nodes), node)
         end
     end
-    return QCCDevCtrl(qccd,0,traps,junctions,shuttles, graph)
+    return QCCDevCtrl(qccd,:No,false,0,traps,junctions,shuttles, graph)
 end

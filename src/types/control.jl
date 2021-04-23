@@ -20,10 +20,10 @@ queue: Array of qubits waiting in the junction end (if any)
 status: Status of the junction end, either free (queue is empty) or blocked otherwise
 """
 struct JunctionEnd
-    qubit::Union{Nothing,Symbol}
+    qubit::Union{Nothing,Int}
     status::Symbol
     JunctionEnd() = new(nothing, :free)
-    function JunctionEnd(qubit::Symbol, status::Symbol)
+    function JunctionEnd(qubit::Int, status::Symbol)
         status in JunctionEndStatus || 
                 throw(ArgumentError("Junction status $status not supported"))
         new(qubit, status)
@@ -53,7 +53,7 @@ end
 
 """  
 Struct for the qubits.
-id: qubit identifictor 
+id: qubit ID 
 status: current qubit status
     - moving
     - resting
@@ -63,11 +63,11 @@ position: current qubit position
 destination: qubit destination, it could not have any
 """
 struct Qubit
-    id::Symbol
+    id::Int
     status::Symbol
     position::Symbol
     destination::Union{Nothing,Symbol}
-    function Qubit(id::Symbol, status::Symbol, position::Symbol,
+    function Qubit(id::Int, status::Symbol, position::Symbol,
                                             destination::Union{Nothing,Symbol})
         status in QubitStatus || throw(ArgumentError("Qubit status $status not supported"))
         return new(id, status, position, destination)
@@ -95,7 +95,7 @@ qubit: qubit id in that ending
 shuttle: shuttle id the ending is connected
 """
 struct TrapEnd
-    qubit::Union{Symbol, Nothing}
+    qubit::Union{Int, Nothing}
     shuttle::Union{Symbol, Nothing}
     TrapEnd(shuttle) = shuttle == Symbol("") ? new(nothing, nothing) : new(nothing,shuttle)
     TrapEnd(qubit,shuttle) = shuttle == Symbol("") ? new(qubit,nothing) : new(qubit,shuttle)
@@ -105,18 +105,18 @@ end
 Struct for the traps.
 id: trap identifier
 capacity: maximum qubits in the trap 
-chain: Orderer Qbits in the trap (from end0 to end1)
+chain: Ordered Qubits in the trap (from end0 to end1)
 end0 & end1: Trap endings
 Throws ArgumentError if length(chain) > capacity
 """
 struct Trap
     id::Symbol
     capacity::Int64
-    chain::Array{Symbol}
+    chain::Array{Int}
     end0::TrapEnd
     end1::TrapEnd
     gate::Bool
-    loading_hole::Tuple{Bool, Union{Symbol, Nothing}}
+    loading_hole::Tuple{Bool, Union{Int, Nothing}}
     Trap(id, capacity, end0, end1, gate, holeBool) =
                         new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
 end
