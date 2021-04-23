@@ -188,5 +188,6 @@ function giveQccCtrl()::QCCDevCtrl
             add_edge!(graph, parse(Int64, nodes), node)
         end
     end
-    return QCCDevCtrl(qccd,0,traps,junctions,shuttles, graph)
+    max_capacity = reduce(+,map(tr -> tr.capacity,collect(values(traps))))
+    return QCCDevCtrl(qccd, max_capacity, 0, traps,junctions,shuttles, graph)
 end

@@ -47,6 +47,7 @@ end
 
 function checkEqualQCCDevCtrl(qccdc1::QCCDevCtrl,qccdc2::QCCDevCtrl):: Bool
     @assert qccdc1.t_now == qccdc2.t_now
+    @assert qccdc1.max_capacity == qccdc2.max_capacity
     @assert checkEqualQCCD(qccdc1.dev, qccdc2.dev)
     @assert nv(qccdc1.graph) == nv(qccdc2.graph)
     @assert ne(qccdc1.graph) == ne(qccdc2.graph)
