@@ -1,8 +1,9 @@
 module QCCDevControl_Types
 export Trap, Junction, Shuttle, Qubit, JunctionEnd, TrapEnd, JunctionType, JunctionEndStatus
-export QubitStatus, typesSizes
+export QubitStatus, typesSizes, Time_t, QCCDevControl
 
 using LightGraphs
+using ..QCCDevDes_Types
 
 # Possible Qubits Status
 const QubitStatus = Set([:inLoadingZone, :inGateZone])
@@ -13,6 +14,13 @@ const JunctionEndStatus = Set([:free, :blocked])
 # Supported junction types with corresponding sizes
 const JunctionType = Set([:T, :Y, :X ])
 const typesSizes = Dict(:T => 3, :Y => 3, :X => 4)
+
+"""
+Type for time inside the qdev, in [change if necessary]   10^{-10}
+seconds, i.e., ns/10.  All times are ≥0; negative value of expressions
+of this type are errors (and may carry local error information).
+"""
+const Time_t = Int64
 
 """
 Struct for junction end.
@@ -119,6 +127,24 @@ struct Trap
     loading_hole::Tuple{Bool, Union{Symbol, Nothing}}
     Trap(id, capacity, end0, end1, gate, holeBool) =
                         new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
+end
+
+struct QCCDevControl
+    dev         ::QCCDevDescription
+    max_capacity::Int64
+    t_now       ::Time_t
+# Descomment when load() function is done
+#    qubits      ::Dict{String,Qubit}
+    traps       ::Dict{Symbol,Trap}
+    junctions   ::Dict{Symbol,Junction}
+    shuttles    ::Dict{Symbol,Shuttle}
+    graph       ::SimpleGraph{Int64}
+
+    # Rest of struct contains description of current status of qdev
+    # and its ions, such as the list of operations that are ongoing
+    # right now.
+    QCCDevControl(dev, max_capacity, traps, junctions, shuttles, graph) = 
+            new(dev, max_capacity, 0, traps, junctions, shuttles, graph)
 end
 
 end

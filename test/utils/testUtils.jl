@@ -1,7 +1,7 @@
 using qccdSimulator.QCCDevControl_Types
 using qccdSimulator.QCCDevDes_Types
 using Random
-using qccdSimulator.QCCDevControl
+using qccdSimulator.QCCDDevControl
 
 """
 Generates n junctions connected to shuttles.
@@ -164,9 +164,9 @@ end
 
 
 """
-Creates a struct QCCDevCtrl based in the file giveQccDes()
+Creates a struct QCCDevControl based in the file giveQccDes()
 """
-function giveQccCtrl()::QCCDevCtrl
+function giveQccCtrl()::QCCDevControl
     qccd::QCCDevDescription = giveQccDes()
     traps = Dict{Symbol,Trap}()
     map(tr -> traps[Symbol(tr.id)] = Trap(Symbol(tr.id), qccd.trap.capacity,
@@ -189,5 +189,5 @@ function giveQccCtrl()::QCCDevCtrl
         end
     end
     max_capacity = reduce(+,map(tr -> tr.capacity,collect(values(traps))))
-    return QCCDevCtrl(qccd, max_capacity, 0, traps,junctions,shuttles, graph)
+    return QCCDevControl(qccd, max_capacity, traps,junctions,shuttles, graph)
 end

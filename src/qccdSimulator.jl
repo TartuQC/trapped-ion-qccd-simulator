@@ -3,7 +3,9 @@ export readJSON
 
 include("./types/description.jl")
 include("./types/control.jl")
+include("./utils/qccdevctrlChecks.jl")
 include("./qccdevcontrol.jl")
+
 
 using .QCCDevDes_Types
 using JSON3
