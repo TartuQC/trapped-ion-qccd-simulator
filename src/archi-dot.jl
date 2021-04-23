@@ -77,8 +77,8 @@ Struct `XX_t` — $e^{-i\pi\theta X₁\otimes X₂$ ...
 Subtype of `U_Oper_type`.
 """
 struct XX_t <: U_Oper_type
-    q₁ ::UInt16
-    q₂ ::Uint16
+    q₁ ::Int32
+    q₂ ::Int32
     θ  ::Float32
 end
 
@@ -89,8 +89,8 @@ Struct `ZZ_t` — $e^{-i\pi\theta Z₁\otimes Z₂$ ...
 Subtype of `U_Oper_type`.
 """
 struct ZZ_t <: U_Oper_type
-    q₁ ::UInt16
-    q₂ ::Uint16
+    q₁ ::Int32
+    q₂ ::Int32
     θ  ::Float32
 end
 
@@ -100,7 +100,7 @@ Struct `Rz_t` — 𝑍-axis Pauli rotation
 Subtype of `U_Oper_type`.
 """
 struct Rz_t <: U_Oper_type
-    q ::UInt16
+    q  ::Int32
     θ  ::Float32
 end
 
@@ -112,7 +112,7 @@ Struct `Rxy_t` — Bloch sphere rotation
 Subtype of `U_Oper_type`.
 """
 struct Rxy_t <: U_Oper_type
-    q ::UInt16
+    q ::Int32
     θ ::Float32
     ϕ ::Float64
 end
@@ -131,7 +131,7 @@ Struct `Rxy_t` — Bloch sphere rotation
 Subtype of `U_Oper_type`.
 """
 struct Load_t <: S_Oper_type
-    q    ::UInt16
+    q    ::Int32
     zone ::Float32
 end
 
