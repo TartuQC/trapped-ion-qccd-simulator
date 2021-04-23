@@ -12,6 +12,8 @@
 ### Design goal
 - Simple!  It's the output of a function that will be adapted by
   researchers.
+- Direct construction & manipulation (i.e., not through service
+  functions)
 
 ### Content
 - refers to one instance of QCCDevDescription
