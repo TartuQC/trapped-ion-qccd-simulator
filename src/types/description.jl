@@ -1,8 +1,12 @@
 module QCCDevDes_Types
 export QCCDevDescription, TrapDesc, TrapInfoDesc, ShuttleDesc, ShuttleInfoDesc
-export JunctionDesc, JunctionInfoDesc, AdjacencyDesc
+export JunctionDesc, JunctionInfoDesc, AdjacencyDesc, OperationTimes, setOperationTimes
 
 using StructTypes
+
+OperationTimes = Dict{Symbol, Int64}()
+
+setOperationTimes(times :: Dict{Symbol, Int64}) = global OperationTimes = times
 
 struct TrapInfoDesc
     id:: Int64

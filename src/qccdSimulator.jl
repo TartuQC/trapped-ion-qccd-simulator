@@ -1,5 +1,5 @@
 module qccdSimulator
-export readJSON
+export readJSON, readTimeJSON
 
 include("./types/description.jl")
 include("./types/control.jl")
@@ -11,7 +11,7 @@ using JSON3
 
 """
 Creates an object QCCDevDescription from JSON.
-Throws ArgumentError an error if input is not a valid file.
+Throws ArgumentError if input is not a valid file.
 """
 function readJSON(path::String)::QCCDevDescription
     if !isfile(path)
@@ -23,6 +23,23 @@ function readJSON(path::String)::QCCDevDescription
     catch err
         throw(ArgumentError(err.msg))
     end
+end
+
+"""
+Fills OperationTimes global variable from JSON file.
+Throws ArgumentError if input is not a valid file.
+"""
+function readTimeJSON(path ::String)
+    if !isfile(path)
+        throw(ArgumentError("Input is not a file"))
+    end
+    # Parsing JSON
+    times = try 
+        JSON3.read(read(path, String), Dict{Symbol, Int64})
+    catch err
+        throw(ArgumentError(err.msg))
+    end
+    setOperationTimes(times)
 end
 
 end

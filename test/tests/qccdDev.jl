@@ -260,3 +260,7 @@ function checkShuttlesTestModifyConnections()
 
     return true
 end
+function readTimeJSONOK(path ::String)
+    readTimeJSON(path)
+    return true
+end
