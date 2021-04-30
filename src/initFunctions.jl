@@ -2,6 +2,8 @@ using LightGraphs
 using .QCCDevDes_Types
 using .QCCDevControl_Types
 
+NIONS = 0
+
 """
 Creates a graph using an object QCCDevDescription.
 Throws ArgumentError if LightGraphs fails to add a node. This will happen
@@ -115,23 +117,11 @@ function _checkShuttles(adjacency:: Dict{String, Array{Int64}}, shuttles::Dict{S
     map(sh ->  check(sh) || throw(errSh(sh.id)), values(shuttles))
 end
 
-########################################################################################################
 
 """
---> DEPRECATED
-Creates a dictionary of qubits using a object TrapJSON.
-Throws ArgumentError if qubit appears in more than one trap.
+Creates a new Qubit in a loading hole and increments the number of current ions in the device.
 """
-function initQubits(trapDesctraps::TrapDesc)::Dict{String,Qubit}
-    qubits = Dict{String,Qubit}()
-    err = (trapId, qubitPos, qubitId) -> ArgumentError("Repeated Ion ID: $qubitId
-                                                        ,in traps $trapId, $qubitPos.")
-
-    for trap in trapDesctraps.traps
-        map(q -> haskey(qubits, q) ? 
-                 throw(err(trap.id, qubits[q].position, qubits[q].id)) :
-                 qubits[q] = Qubit(q, :resting, trap.id, nothing),
-                 trap.chain)
-    end
-    return qubits
+function initQubit(loading_zone::Symbol)::Qubit
+    NIONS += 1
+    return Qubit(NIONS, loading_zone)
 end

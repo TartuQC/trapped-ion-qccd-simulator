@@ -107,26 +107,20 @@ function load(qdc           ::QCCDevControl,
 
     @assert 0 ≤ t            ≤ qdc.t_now
     # ⟶  isallowed...:  @assert 1 ≤ loading_zone ≤ dev.num_loading_zones
+    isallowed_load(qdc, loading_zone, t)
 
-    if ! isallowed_load(qdc, t, loading_zone)
-        throw(QCCDevCtrl__Operation_Not_Allowed_Exception())
-    end
+    qubit = initQubit(loading_zone)
+    qdc.addQubit(qubit)
 
-    local t₀ =
-        compute_end_time() ::Time_t            # todo
+    # TODO: TIMES!!!
+    # local t₀ =
+    #     compute_end_time() ::Time_t            # todo
+ 
+    # @assert t₀ > t                             "Something went horribly wrong: Time has stopped!"
+ 
+    # qdc.t_now = t
 
-
-    local new_ion_idx =
-        do_the_work()  ::Int
-
-    @assert t₀ > t                             "Something went horribly wrong: Time has stopped!"
-    @assert new_ion_idx > 0                    "New ion index is ≤ 0 WTF!"
-
-    modify_status()                            # todo
-
-    qdc.t_now = t
-
-    return (new_ion_idx=new_ion_idx, t₀=t₀)
+    return (new_ion_idx=qubit.id, t₀=0)
 end #^ module
 # EOF
 

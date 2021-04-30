@@ -75,12 +75,10 @@ struct Qubit
     status::Symbol
     position::Symbol
     destination::Union{Nothing,Symbol}
-    function Qubit(id::Int, status::Symbol, position::Symbol,
-                                            destination::Union{Nothing,Symbol})
-        status in QubitStatus || throw(ArgumentError("Qubit status $status not supported"))
-        return new(id, status, position, destination)
-    end
+    Qubit(id::Int, position::Symbol) = new(id, :inLoadingZone, position, nothing)
 end
+
+# status in QubitStatus || throw(ArgumentError("Qubit status $status not supported"))
 
 """  
 Struct for the shuttles.
@@ -127,10 +125,9 @@ struct Trap
     loading_hole::Tuple{Bool, Union{Int, Nothing}}
     Trap(id, capacity, end0, end1, gate, holeBool) =
                         new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
-    getIonInLoadingHole(){
-        loading_hole[1] ? return loading_hole[2]
-        : throw(ArgumentError("Trap with id $id does not have loading hole"))
-    }
+    getIonInLoadingHole() = 
+        loading_hole[1] ? loading_hole[2] : 
+        throw(ArgumentError("Trap with id $id does not have loading hole"))
 end
 
 """
@@ -154,7 +151,7 @@ struct QCCDevControl
 
     t_now       ::Time_t
 # Descomment when load() function is done
-#    qubits      ::Dict{String,Qubit}
+    qubits      ::Dict{Int,Qubit}
     traps       ::Dict{Symbol,Trap}
     junctions   ::Dict{Symbol,Junction}
     shuttles    ::Dict{Symbol,Shuttle}
@@ -164,9 +161,10 @@ struct QCCDevControl
     # and its ions, such as the list of operations that are ongoing
     # right now.
     QCCDevControl(dev, max_capacity, simulate, qnoise_estimate,
-                 traps, junctions, shuttles, graph) = 
+                  traps, junctions, shuttles, graph) = 
             new(dev, max_capacity, simulate, qnoise_estimate, 0,
-                 traps, junctions, shuttles, graph)
+                Dict{String,Qubit}(), traps, junctions, shuttles, graph)
+    addQubit(qubit::Qubit) = qubits[qubit.id] = qubit
 end
 
 end
