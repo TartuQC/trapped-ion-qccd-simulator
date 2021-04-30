@@ -103,9 +103,7 @@ The function returns a named tuple consisting of:
 """
 function load(qdc           ::QCCDevControl,
               t             ::Time_t,
-              loading_zone  ::Any       )  ::@NamedTuple{new_ion_idx::Int,t₀::Time_t}
-
-# TODO: Replace `Any` by correct type
+              loading_zone  ::Symbol       )  ::@NamedTuple{new_ion_idx::Int,t₀::Time_t}
 
     @assert 0 ≤ t            ≤ qdc.t_now
     # ⟶  isallowed...:  @assert 1 ≤ loading_zone ≤ dev.num_loading_zones
