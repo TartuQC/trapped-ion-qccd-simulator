@@ -36,14 +36,21 @@ end
 end
 
 # TODO: TIMES!
-@testset "Load ions `load()`" begin
+@testset "Load ions `load()` and `isallowed_load()`" begin
     @test initQubitTest()
     # Check time is okay
-    @test_throws OperationNotAllowedException("Time must be higher than 10") isallowedLoad_timeFailsTest()
+    @test_throws OperationNotAllowedException("Time must be higher than " *
+                                                     "10") isallowedLoad_timeFailsTest()
     # Check error when time is not okay
     # Check error max ions
-
+    @test_throws OperationNotAllowedException("Device's maximum capacity (9) already"
+                                    * " achieved.") isallowedLoad_capacityFailsTest()
     # Check error not existing id 
+    @test_throws OperationNotAllowedException("Trap with given id test doesn't" *
+                                    " exist.") isallowedLoad_trapNotExistTest()
     # Check error loading hole is busy
+    @test_throws OperationNotAllowedException("Loading hole is " *
+                                              "busy.") isallowedLoad_loadingHoleBusyTest()
     # AddQubit works
+    # Check loading hole exist
 end

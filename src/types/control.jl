@@ -115,7 +115,7 @@ Struct for the traps.
     - end0 & end1: Trap endings
     - Throws ArgumentError if length(chain) > capacity
 """
-struct Trap
+mutable struct Trap
     id::Symbol
     capacity::Int64
     chain::Array{Int}

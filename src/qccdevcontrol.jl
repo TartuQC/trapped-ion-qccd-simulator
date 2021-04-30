@@ -110,8 +110,8 @@ function load(qdc           ::QCCDevControl,
     isallowed_load(qdc, loading_zone, t)
 
     qubit = initQubit(loading_zone)
-    qdc.addQubit(qubit)
-
+    qdc.qubits[qubit.id] = qubit
+    qccd.traps[loading_zone].loading_hole.qubit = qubit.id
     # TODO: TIMES!!!
     # local t₀ =
     #     compute_end_time() ::Time_t            # todo
@@ -121,7 +121,7 @@ function load(qdc           ::QCCDevControl,
     # qdc.t_now = t
 
     return (new_ion_idx=qubit.id, t₀=0)
-end #^ module
+end #^ module 
 # EOF
 
 ####################################################################################################

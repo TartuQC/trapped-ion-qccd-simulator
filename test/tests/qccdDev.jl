@@ -281,6 +281,24 @@ end
 
 function isallowedLoad_capacityFailsTest()
     qccd = giveQccCtrl()
-    @show qccd.max_capacity
-
+    for i in 1:10     
+        qubit = qccdSimulator.QCCDDevControl.initQubit(:test)
+        qccd.qubits[qubit.id]= qubit
+    end
+    isallowed_load(qccd,:test,10)
+    return true
 end
+
+function isallowedLoad_trapNotExistTest()
+    qccd = giveQccCtrl()
+    isallowed_load(qccd,:test,4)
+    return true
+end
+
+function isallowedLoad_loadingHoleBusyTest()
+    qccd = giveQccCtrl()
+    qccd.traps[Symbol(1)].loading_hole.qubit = qubit.id
+    isallowed_load(qccd,:1,4)
+    return true
+end
+
