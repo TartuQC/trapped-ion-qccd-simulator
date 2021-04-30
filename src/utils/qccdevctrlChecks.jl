@@ -38,7 +38,22 @@ function  load_checks()
 end
 
 """
-TODO: Doc
+Function `isallowed_loadingHole_transport()` — Checks if loadingHole_transport is feasible.
+
+# Arguments
+* `qdc::QCCDevControl` - The actual device.
+* `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
+  given to previous function calls.
+* `ion_idx`   — index (1-based) of ion to be moved.
+* `edge-idx`  — index (1-based) of edge to move along.
+
+The function returns the time at which the operation will be completed.
+Throws OperationNotAllowedException if:
+        Time given is less than current time in device.
+        Time model is not defined for loadingHole_transport operation.
+        ion_idx or trap_idx are not in the device.
+        Trap with ID trap_idx doesn't have a loading hole.
+        The ion is not in the trap's loading zone.
 """
 function  isallowed_loadingHole_transport(qdc           :: QCCDevControl,
                                           t             :: Time_t,

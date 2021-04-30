@@ -158,6 +158,7 @@ end
 Function `loadingHole_transport()` — moves ions from loading holes to gate zones.
 
 # Arguments
+* `qdc::QCCDevControl` - The actual device.
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 * `ion_idx`   — index (1-based) of ion to be moved.
@@ -170,20 +171,12 @@ function loadingHole_transport(qdc           :: QCCDevControl,
                           ion_idx       :: Int,
                           trap_idx      :: Int       ) ::Time_t
   
-  isallowed_loadingHole_transport(qdc, t, ion_idx, trap_idx)
-    
-  compute_end_time()
-
-  get_Qerrors()
+  isallowed_loadingHole_transport(qdc, t, ion_idx, trap_idx)  
   
   qdc.traps[trap_idx].loading_hole[2] = nothing
-  
   qdc.qubits[ion_idx].status = :inGateZone
-
-  qdc.t_now = foo
-
-  modify_QDC() # Change time, qubit status and place, update cummulative Q error?
-
+  qdc.t_now = t + OperationTimes[:loadingHole_transport]  
+  return qdc.t_now
 
 end
 
