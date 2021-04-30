@@ -262,5 +262,35 @@ function checkShuttlesTestModifyConnections()
 end
 function readTimeJSONOK(path ::String)
     readTimeJSON(path)
+    @assert OperationTimes[:load] == 5
+    @assert OperationTimes[:linear_transport] == 78
+    @assert OperationTimes[:loadingHole_transport] == 35
+    @assert OperationTimes[:swap] == 2
+    @assert OperationTimes[:split] == 55
+    return true
+end
+
+function readTimeJSONfail(paths ::Array{String})
+   errormsg1 = "Time values can't be negative"
+   errormsg2 = "invalid JSON"
+   errorcount = 0
+   for path ∈ paths
+        try
+            readTimeJSON(path)
+        catch e
+            @assert startswith(e.msg, errormsg1) || startswith(e.msg, errormsg2)
+            errorcount += 1
+        end
+   end
+   @assert errorcount == length(paths)
+   return true
+end
+
+function readTimeJSONnoFile()
+    try
+        readTimeJSON("foo")
+    catch e
+        @assert startswith(e.msg, "Input is not a file")
+    end
     return true
 end

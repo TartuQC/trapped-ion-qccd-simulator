@@ -8,6 +8,9 @@ using LightGraphs
     @test_throws ArgumentError("Input is not a file") readJSON(".")
     @test_throws ArgumentError readJSON("./testFiles/wrongTopology.json")
     @test readTimeJSONOK("./testFiles/times.json")
+    @test readTimeJSONfail(["./testFiles/negativeTimes.json",
+                                        "testFiles/wrongTimes.json","testFiles/wrongTimes2.json"])
+    @test readTimeJSONnoFile()
 end
 
 @testset "QCCDevControl initialization" begin

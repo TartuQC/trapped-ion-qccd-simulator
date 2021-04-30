@@ -1,7 +1,7 @@
 {
     "load": 5,
     "linear_transport": 78,
-    "loadingHole_transport": 35,
+    "loadingHole_transport": -35,
     "swap": 2,
     "split": 55
 }

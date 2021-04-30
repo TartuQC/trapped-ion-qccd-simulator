@@ -28,6 +28,8 @@ end
 """
 Fills OperationTimes global variable from JSON file.
 Throws ArgumentError if input is not a valid file.
+Throws ArgumentError if there is a negative time value.
+Throws ArgumentError if file contents are not of the format Dict{String, Int}.
 """
 function readTimeJSON(path ::String)
     if !isfile(path)
@@ -39,6 +41,9 @@ function readTimeJSON(path ::String)
     catch err
         throw(ArgumentError(err.msg))
     end
+    isempty(filter(v -> v < 0, collect(values(times)))) ||
+        throw(ArgumentError("Time values can't be negative"))
+
     setOperationTimes(times)
 end
 
