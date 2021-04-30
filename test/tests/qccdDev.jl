@@ -260,3 +260,27 @@ function checkShuttlesTestModifyConnections()
 
     return true
 end
+
+function initQubitTest()
+    for i in 1:25
+        qubit1 = Qubit(i,:test)
+        qubit2 = qccdSimulator.QCCDDevControl.initQubit(:test)
+        @assert qubit1.id == qubit2.id == i
+        @assert qubit1.status == qubit2.status == :inLoadingZone
+        @assert qubit1.position == qubit2.position == :test
+        @assert qubit1.destination == qubit2.destination == nothing
+    end
+    return true
+end
+
+function isallowedLoad_timeFailsTest()
+    qccd = giveQccCtrl()
+    qccd.t_now = 10
+    isallowed_load(qccd, :test, 3)
+end
+
+function isallowedLoad_capacityFailsTest()
+    qccd = giveQccCtrl()
+    @show qccd.max_capacity
+
+end

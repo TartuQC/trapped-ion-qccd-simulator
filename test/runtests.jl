@@ -1,5 +1,6 @@
 include("tests/qccdDev.jl")
 using qccdSimulator
+using qccdSimulator.QCCDev_Feasible
 using Test
 using LightGraphs
 
@@ -34,10 +35,15 @@ end
     " wrong connected.") checkTrapsShuttleWrongConnectedTest()
 end
 
+# TODO: TIMES!
 @testset "Load ions `load()`" begin
+    @test initQubitTest()
     # Check time is okay
+    @test_throws OperationNotAllowedException("Time must be higher than 10") isallowedLoad_timeFailsTest()
     # Check error when time is not okay
     # Check error max ions
+
     # Check error not existing id 
     # Check error loading hole is busy
+    # AddQubit works
 end

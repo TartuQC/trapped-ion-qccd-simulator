@@ -122,12 +122,9 @@ struct Trap
     end0::TrapEnd
     end1::TrapEnd
     gate::Bool
-    loading_hole::Tuple{Bool, Union{Int, Nothing}}
+    loading_hole::@NamedTuple{exist::Bool, qubit::Union{Int, Nothing}}
     Trap(id, capacity, end0, end1, gate, holeBool) =
-                        new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
-    getIonInLoadingHole() = 
-        loading_hole[1] ? loading_hole[2] : 
-        throw(ArgumentError("Trap with id $id does not have loading hole"))
+                        new(id, capacity, [], end0, end1, gate, (exist=holeBool,qubit=nothing))
 end
 
 """
@@ -142,7 +139,7 @@ Struct for the Device control.
     - shuttles: current shuttles' status of the device
     - graph: topology's graph 
 """
-struct QCCDevControl
+mutable struct QCCDevControl
     dev         ::QCCDevDescription
     max_capacity::Int64
 
@@ -150,21 +147,17 @@ struct QCCDevControl
     qnoise_esimate ::Bool                     
 
     t_now       ::Time_t
-# Descomment when load() function is done
+
     qubits      ::Dict{Int,Qubit}
     traps       ::Dict{Symbol,Trap}
     junctions   ::Dict{Symbol,Junction}
     shuttles    ::Dict{Symbol,Shuttle}
     graph       ::SimpleGraph{Int64}
 
-    # Rest of struct contains description of current status of qdev
-    # and its ions, such as the list of operations that are ongoing
-    # right now.
     QCCDevControl(dev, max_capacity, simulate, qnoise_estimate,
                   traps, junctions, shuttles, graph) = 
             new(dev, max_capacity, simulate, qnoise_estimate, 0,
                 Dict{String,Qubit}(), traps, junctions, shuttles, graph)
-    addQubit(qubit::Qubit) = qubits[qubit.id] = qubit
 end
 
 end

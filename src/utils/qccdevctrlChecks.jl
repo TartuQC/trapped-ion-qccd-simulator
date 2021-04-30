@@ -4,7 +4,7 @@
 # Sub-module QCCDevCtrl
 
 module QCCDev_Feasible
-export load_checks
+export load_checks, OperationNotAllowedException, isallowed_load
 
 using ..QCCDevControl_Types
 
@@ -28,9 +28,8 @@ Function `time_check()` — checks if given time is correct
 
 The function throws an error if time is not correct.
 """
-_time_check(t_qdc:: Time_t, t::Time_t) = begin
-  t_qdc.t_now ≤ t  || opError("Time must be higher than $(t_qdc.t_now)")
-end
+_time_check(t_qdc:: Time_t, t::Time_t) = 
+  t_qdc ≤ t  || opError("Time must be higher than $t_qdc")
 
 """
 Function `isallowed_load()` — checks if load operation is posisble
@@ -48,7 +47,6 @@ Function `isallowed_load()` — checks if load operation is posisble
 """
 function  isallowed_load(qdc::QCCDevControl, loading_zone::Symbol, t::Time_t)
     _time_check(qdc.t_now, t)
-
     lenght(qdc.qubits) < max_capacity || opError("Device's maximum capacity already achieved.")
     haskey(qcd.traps, loading_zone) || opError("Trap with given id $loading_zone doesn't exist.")
     qcd.traps[loading_zone].getIonInLoadingHole() && opError("Loading hole is already busy.")

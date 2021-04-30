@@ -122,6 +122,7 @@ end
 Creates a new Qubit in a loading hole and increments the number of current ions in the device.
 """
 function initQubit(loading_zone::Symbol)::Qubit
+    global NIONS
     NIONS += 1
     return Qubit(NIONS, loading_zone)
 end
