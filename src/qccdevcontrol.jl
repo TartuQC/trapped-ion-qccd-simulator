@@ -169,7 +169,22 @@ function loadingHole_transport(qdc           :: QCCDevControl,
                           t             :: Time_t,
                           ion_idx       :: Int,
                           trap_idx      :: Int       ) ::Time_t
+  
+  isallowed_loadingHole_transport(qdc, t, ion_idx, trap_idx)
     
+  compute_end_time()
+
+  get_Qerrors()
+  
+  qdc.traps[trap_idx].loading_hole[2] = nothing
+  
+  qdc.qubits[ion_idx].status = :inGateZone
+
+  qdc.t_now = foo
+
+  modify_QDC() # Change time, qubit status and place, update cummulative Q error?
+
+
 end
 
 ####################################################################################################

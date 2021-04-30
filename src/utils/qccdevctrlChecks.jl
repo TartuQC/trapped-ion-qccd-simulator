@@ -8,9 +8,6 @@ export load_checks, isallowed_loadingHole_transport
 
 using ..QCCDevControl_Types
 
-struct OperationNotAllowedException <: Exception
-  msg ::String
-end
 """
 Default error message for QCCD operations.
 """
@@ -40,10 +37,18 @@ function  load_checks()
     
 end
 
+"""
+TODO: Doc
+"""
 function  isallowed_loadingHole_transport(qdc           :: QCCDevControl,
                                           t             :: Time_t,
                                           ion_idx       :: Int,
-                                          trap_idx      :: Symbol       ):: Bool
+                                          trap_idx      :: Symbol       )
+
+  symbol = :loadingHole_transport
+  symbol ∈ keys(OperationTimes) ||
+          throw(OperationNotAllowedException("Time model for loading hole transport not defined"))
+
 
   ion_idx ∈ keys(qdc.qubits) ||
           throw(OperationNotAllowedException("Ion with ID $ion_idx is not in device"))
@@ -51,11 +56,14 @@ function  isallowed_loadingHole_transport(qdc           :: QCCDevControl,
   trap_idx ∈ keys(qdc.traps) ||
           throw(OperationNotAllowedException("Trap with ID $ion_idx is not in device"))
 
+  qdc.traps[trap_idx].loading_hole[1] ||
+          throw(OperationNotAllowedException("Trap with ID $ion_idx does not have a loading hole"))
+
   (qdc.qubits[ion_idx].status == :inLoadingZone && 
-    qdc.traps[trap_idx].loading_hole[2] == ion_idx) ||
+    qdc.traps[trap_idx].getIonInLoadingHole() == ion_idx) ||
           throw(OperationNotAllowedException("Ion is not in trap's loading zone"))
   
-  
+  _time_check(qdc.t_now, t)
 
 end
 

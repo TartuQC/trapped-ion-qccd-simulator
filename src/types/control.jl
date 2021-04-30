@@ -127,6 +127,13 @@ struct Trap
     loading_hole::Tuple{Bool, Union{Int, Nothing}}
     Trap(id, capacity, end0, end1, gate, holeBool) =
                         new(id, capacity, [], end0, end1, gate, (holeBool,nothing))
+    
+    """Returns ion in loading_hole.
+    Throws ArgumentError if the trap doesn't have a loading hole"""
+    getIonInLoadingHole(){
+        loading_hole[1] ? return loading_hole[2]
+        : throw(ArgumentError("Trap does not have loading hole"))
+    }
 end
 
 """
