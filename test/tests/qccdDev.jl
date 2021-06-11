@@ -624,7 +624,7 @@ function isallowedLinearTransportTestBlockedEnd0()
     try
         isallowed_linear_transport(qdd, qdd.t_now+1, 1, Symbol(7)) 
     catch e
-        @assert endswith(e.msg,"not in the correct end position.")
+        @assert endswith(e.msg,"isn't in the correct position or is not alone in the chain.")
         return true
     end
     return false
@@ -644,7 +644,7 @@ function isallowedLinearTransportTestBlockedEnd1()
     try
         isallowed_linear_transport(qdd, qdd.t_now+1, 1, Symbol(8)) 
     catch e
-        @assert endswith(e.msg,"not in the correct end position.")
+        @assert endswith(e.msg,"isn't in the correct position or is not alone in the chain.")
         return true
     end
     return false

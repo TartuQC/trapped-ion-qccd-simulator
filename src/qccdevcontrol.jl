@@ -131,7 +131,7 @@ Function `linear_transport()` — moves ions between zones/junctions.
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 * `ion_idx`   — index (1-based) of ion to be moved.
-* `edge-idx`  — index (1-based) of edge to move along.
+* `edge-idx`  — index (1-based) of destination zone.
 
 The function returns the time at which the operation will be completed.
 """
@@ -168,15 +168,20 @@ Function `junction_transport()` — moves around a junction.
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 * `ion_idx`   — index (1-based) of ion to be moved.
-* `edge_idx` — index (1-based) of edge identifying the edge on which the ion leaves the junction.
+* `edge_idx` — index (1-based) of destination zone.
 
 The function returns the time at which the operation will be completed.
 """
 function junction_transport(qdc           :: QCCDevControl,
                             t             :: Time_t,
                             ion_idx       :: Int,
-                            edge_idx      :: Int       ) ::Time_t
-    
+                            destination_idx      :: Symbol       ) ::Time_t
+  # Checks
+  isallowed_junction_transport(qdc, t, ion_idx, destination_idx)
+
+  
+
+
 end
 
 
