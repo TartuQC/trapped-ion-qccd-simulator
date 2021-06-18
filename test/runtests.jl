@@ -73,7 +73,7 @@ end
     @test loadOKTest()
 end 
 
-@testset "Swap & isallowed_swap" begin
+@testset "Swap & isallowed_swap_split" begin
     @test_throws OperationNotAllowedException("Qubit with id 99" *
                                               " doesn't exist.") isallowedSwap_qubitNotExist()
     @test_throws OperationNotAllowedException("Qubits with ids 1  " *
@@ -92,4 +92,8 @@ end
     @test isallowedSwap_OK()
     @test swap_OK1()
     @test swap_OK2()
+end
+
+@testset "Swap & isallowed_swap_split" begin
+    @test isallowedSplit_OK()
 end

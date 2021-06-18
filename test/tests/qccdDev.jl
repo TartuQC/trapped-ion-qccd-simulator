@@ -762,7 +762,7 @@ end
 # ========= swap function test =========
 function isallowedSwap_qubitNotExist()
     qccd = giveQccCtrl()
-    isallowed_swap(qccd, 99, 1, 10)
+    isallowed_swap_split(qccd, 99, 1, 10)
 end
 
 function isallowedSwap_qubitNotSameZone()
@@ -773,7 +773,7 @@ function isallowedSwap_qubitNotSameZone()
     qccd.qubits[ion2.id] = deepcopy(ion2)
     push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
     push!(qccd.gateZones[Symbol(2)].chain, [ion2.id])
-    isallowed_swap(qccd, ion1.id, ion2.id, 10)
+    isallowed_swap_split(qccd, ion1.id, ion2.id, 10)
 end
 
 function isallowedSwap_qubitNotGateZone()
@@ -784,7 +784,7 @@ function isallowedSwap_qubitNotGateZone()
     qccd.qubits[ion2.id] = deepcopy(ion2)
     push!(qccd.auxZones[Symbol(4)].chain, [ion1.id])
     push!(qccd.auxZones[Symbol(4)].chain[1], ion2.id)
-    isallowed_swap(qccd, ion1.id, ion2.id, 10)
+    isallowed_swap_split(qccd, ion1.id, ion2.id, 10)
 end
 
 function isallowedSwap_qubitsNotAdjacents1()
@@ -798,7 +798,7 @@ function isallowedSwap_qubitsNotAdjacents1()
     push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
     push!(qccd.gateZones[Symbol(1)].chain[1], ion2.id)
     push!(qccd.gateZones[Symbol(1)].chain[1], ion3.id)
-    isallowed_swap(qccd, ion1.id, ion3.id, 10)
+    isallowed_swap_split(qccd, ion1.id, ion3.id, 10)
 end
 
 function isallowedSwap_qubitsNotAdjacents2()
@@ -821,7 +821,7 @@ function isallowedSwap_qubitsNotAdjacents2()
     push!(qccd.gateZones[Symbol(1)].chain, [ion4.id])
     push!(qccd.gateZones[Symbol(1)].chain[2], ion5.id)
     push!(qccd.gateZones[Symbol(1)].chain[2], ion6.id)
-    isallowed_swap(qccd, ion4.id, ion6.id, 10)
+    isallowed_swap_split(qccd, ion4.id, ion6.id, 10)
 end
 
 function isallowedSwap_OK()
@@ -835,7 +835,7 @@ function isallowedSwap_OK()
     push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
     push!(qccd.gateZones[Symbol(1)].chain[1], ion2.id)
     push!(qccd.gateZones[Symbol(1)].chain[1], ion3.id)
-    isallowed_swap(qccd, ion2.id, ion3.id, 10)
+    isallowed_swap_split(qccd, ion2.id, ion3.id, 10)
 end
 
 function swap_OK1()
@@ -876,7 +876,7 @@ function isallowedSwap_qubitsNotSameChain1()
     push!(qccd.gateZones[Symbol(1)].chain, [ion4.id])
     push!(qccd.gateZones[Symbol(1)].chain[2], ion5.id)
     push!(qccd.gateZones[Symbol(1)].chain[2], ion6.id)
-    isallowed_swap(qccd, ion3.id, ion5.id, 10)
+    isallowed_swap_split(qccd, ion3.id, ion5.id, 10)
 end
 
 function isallowedSwap_qubitsNotSameChain2()
@@ -899,7 +899,7 @@ function isallowedSwap_qubitsNotSameChain2()
     push!(qccd.gateZones[Symbol(1)].chain, [ion4.id])
     push!(qccd.gateZones[Symbol(1)].chain[2], ion5.id)
     push!(qccd.gateZones[Symbol(1)].chain[2], ion6.id)
-    isallowed_swap(qccd, ion3.id, ion4.id, 10)
+    isallowed_swap_split(qccd, ion3.id, ion4.id, 10)
 end
 
 function swap_OK2()
@@ -927,5 +927,22 @@ function swap_OK2()
     @assert qccd.gateZones[Symbol(1)].chain == [[1,2,3],[4,6,5]]
     @assert qccd.t_now == 4
     return true
+end
+# ========= END swap function test =========
+
+# ========= swap function test =========
+function isallowedSplit_OK()
+    qccd = giveQccCtrl()
+    ion1 = giveQubit(Symbol(1),1)
+    qccd.qubits[ion1.id] = deepcopy(ion1)
+    ionsAdjacents = [1,50]
+    push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
+    for i in 2:30
+        ion = giveQubit(Symbol(1),i)
+        qccd.qubits[ion.id] = deepcopy(ion)
+        push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
+    end
+    ion = rand(1:29)
+    isallowed_swap_split(qccd, ion, ion+1 , 10)
 end
 # ========= END swap function test =========

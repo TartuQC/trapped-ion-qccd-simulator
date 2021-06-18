@@ -196,7 +196,7 @@ function swap(qdc           :: QCCDevControl,
               ion1_idx      :: Int,
               ion2_idx      :: Int       ) ::Time_t
   # Checks
-  isallowed_swap(qdc, ion1_idx, ion2_idx, t)
+  isallowed_swap_split(qdc, ion1_idx, ion2_idx, t)
 
   # Swap qubits
   _swap_ions(qdc, ion1_idx, ion2_idx)
@@ -210,7 +210,7 @@ end
 ####################################################################################################
 
 """
-Function `split()` — move ion out of gate zone into edge
+Function `split()` — Split chain
 
 # Arguments
 
@@ -224,9 +224,15 @@ The function returns the time at which the operation will be completed.
 """
 function split(qdc           :: QCCDevControl,
                t             :: Time_t,
-               ion_idx       :: Int,
-               edge_idx      :: Int) ::Time_t
-    
+               ion1_idx       :: Int,
+               ion2_idx      :: Int) ::Time_t
+  # Checks
+  isallowed_swap_split(qdc, ion1_idx, ion2_idx, t; split=true)
+
+  # Compute and actualize time
+  local t₀ = compute_time(qdc, t, OperationTimes[:split])
+
+  return t₀
 end
 
 ####################################################################################################
