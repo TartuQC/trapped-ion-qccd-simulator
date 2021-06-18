@@ -63,7 +63,6 @@ end
     @test time_checkOKTest()
 end
 
-# TODO: TIMES!
 @testset "Load ions `load()` & `isallowed_load()` & `initQubit()`" begin
     @test initQubitTest()
     @test isallowedLoad_OK()
@@ -73,3 +72,24 @@ end
                                               "busy.") isallowedLoad_loadingHoleBusyTest()
     @test loadOKTest()
 end 
+
+@testset "Swap & isallowed_swap" begin
+    @test_throws OperationNotAllowedException("Qubit with id 99" *
+                                              " doesn't exist.") isallowedSwap_qubitNotExist()
+    @test_throws OperationNotAllowedException("Qubits with ids 1  " *
+                                    "and 2 are not in the same zone.") isallowedSwap_qubitNotSameZone()
+    @test_throws OperationNotAllowedException("Swap can only be done " * 
+                                             "in Gate Zones.") isallowedSwap_qubitNotGateZone()
+    @test_throws OperationNotAllowedException("Qubits with ids 1 and 3 are not" *
+                                             " adjacents.") isallowedSwap_qubitsNotAdjacents1()
+    @test_throws OperationNotAllowedException("Qubits with ids 4 and 6 are not" *
+                                             " adjacents.") isallowedSwap_qubitsNotAdjacents2()
+    
+    @test_throws OperationNotAllowedException("Qubits with ids 3 and 5 are not in the same" *
+                                             " chain.") isallowedSwap_qubitsNotSameChain1()
+    @test_throws OperationNotAllowedException("Qubits with ids 3 and 4 are not in the same" *
+                                             " chain.") isallowedSwap_qubitsNotSameChain2()
+    @test isallowedSwap_OK()
+    @test swap_OK1()
+    @test swap_OK2()
+end

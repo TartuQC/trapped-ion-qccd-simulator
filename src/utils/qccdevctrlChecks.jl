@@ -4,8 +4,8 @@
 # Sub-module QCCDevCtrl
 
 module QCCDev_Feasible
-export load_checks, OperationNotAllowedException, isallowed_load, isallowed_linear_transport
-export isallowed_junction_transport
+export load_checks, OperationNotAllowedException, isallowed_load, isallowed_swap
+export  isallowed_linear_transport, isallowed_junction_transport
 
 using ..QCCDevDes_Types
 using ..QCCDevControl_Types
@@ -57,10 +57,45 @@ function isallowed_load(qdc::QCCDevControl, loading_zone::Symbol, t::Time_t)
 end
 
 """
+Function `isallowed_swap()` — checks if load operation is posisble
+
+# Arguments
+* `qdc::QCCDevControl` — Actual device's status.
+* `ion𝑖_idx`, 𝑖=1,2, the (1-based) indices of the two ions.  Must be in the same gate zone.
+* `t::Time_t` — Time at which the operation commences.  Must be no earlier than the latest time
+                given to previous function calls.
+# checks
+* Check time — Call _time_check function.
+* Check if two ions exists
+* Check if two ions are in the same zone
+* check if ions are in same chain and are adjacents
+* Check if chain is in a gate zone
+"""
+function isallowed_swap(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int , t::Time_t)
+    _time_check(qdc.t_now, t, :load)
+    haskey(qdc.qubits, ion1_idx) || opError("Qubit with id $ion1_idx doesn't exist.")
+    haskey(qdc.qubits, ion2_idx) || opError("Qubit with id $ion2_idx doesn't exist.")
+    qdc.qubits[ion1_idx].position == qdc.qubits[ion2_idx].position || 
+                    opError("Qubits with ids $ion1_idx  and $ion2_idx are not in the same zone.")
+                    
+    zone = giveZone(qdc, qdc.qubits[ion1_idx].position)
+    zone.zoneType == :gateZone || opError("Swap can only be done in Gate Zones.")
+
+    pos1 = map( y -> findall(x->x==ion1_idx, y), zone.chain)
+    pos2 = map( y -> findall(x->x==ion2_idx, y), zone.chain)
+    check = x ->  isempty(pos1[x]) && isempty(pos2[x]) || !isempty(pos1[x]) && !isempty(pos2[x]) ||
+                  opError("Qubits with ids $ion1_idx and $ion2_idx are not in the same chain.")
+    map(x -> check(x) , 1:length(pos1))
+
+    pos1 = collect(Iterators.flatten(pos1))[1]
+    pos2 = collect(Iterators.flatten(pos2))[1]
+    pos1 == pos2 + 1 || pos1 == pos2 - 1 || 
+                    opError("Qubits with ids $ion1_idx and $ion2_idx are not adjacents.")
+end
+
+"""
 Function `isallowed_linear_transport()` — checks feasibility of `linear_transport`.
-
 # Arguments: See `linear_transport`
-
 # checks
 * Check time — Call _time_check function.
 * Check OperationTimes - Checks if time model is defined for `linear_transport`
@@ -69,8 +104,7 @@ Function `isallowed_linear_transport()` — checks feasibility of `linear_transp
 * Check ion position - Check if ion's position exists in the device.
 * Check ion chain - Checks if the ion is in the correct chain position to leave the device.
 * Check ends - Checks if ion position and destination are adjacent.
-* Check capacity - Checks if destination zone is not currently full.
-
+* Check capacity - Checks if destination zone is not currenly full.
 """
 function isallowed_linear_transport(qdc           :: QCCDevControl,
                                     t             :: Time_t,

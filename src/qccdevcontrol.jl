@@ -109,15 +109,15 @@ function load(qdc           ::QCCDevControl,
  
   # Checks
   isallowed_load(qdc, loading_zone, t)
+
   # Create new qubit
   local qubit = initQubit(loading_zone)
   qdc.qubits[qubit.id] = deepcopy(qubit)
   qdc.loadingZones[loading_zone].hole = qubit.id
-  # Compute time
-  local t₀ = t + OperationTimes[:load]
-  t₀ > t  || throw(Error("Error while computing time"))
-  qdc.t_now = t₀
-
+  
+  # Compute and actualize time
+  local t₀ = compute_time(qdc, t, OperationTimes[:load])
+  
   return (new_ion_idx=qubit.id, t₀)
 end #^ module 
 # EOF
@@ -151,10 +151,8 @@ function linear_transport(qdc           :: QCCDevControl,
   # and check if it has arrived to its destination
   _move_ion(ion, origin, destination)
 
-  # Compute time
-  local t₀ = t + OperationTimes[:linear_transport]
-  t₀ > t  || throw(Error("Error while computing time"))
-  qdc.t_now = t₀
+  # Compute and actualize time
+  local t₀ = compute_time(qdc, t, OperationTimes[:linear_transport])
 
   return t₀
 end
@@ -202,7 +200,16 @@ function swap(qdc           :: QCCDevControl,
               t             :: Time_t,
               ion1_idx      :: Int,
               ion2_idx      :: Int       ) ::Time_t
-    
+  # Checks
+  isallowed_swap(qdc, ion1_idx, ion2_idx, t)
+
+  # Swap qubits
+  _swap_ions(qdc, ion1_idx, ion2_idx)
+
+  # Compute and actualize time
+  local t₀ = compute_time(qdc, t, OperationTimes[:swap])
+
+  return t₀
 end
 
 ####################################################################################################

@@ -43,6 +43,17 @@ function giveZonesJunctions(nJunctions:: Int64, juncTypes:: Array{String};
 end
 
 """
+Generates Qubits.
+    * qubitID::Int ID of the qubit, if not given it'll be asigned randomly
+    * zone::Symbol Desaired zone to create the ion
+returns:
+    * Qubit struct
+"""
+function giveQubit(zone::Symbol, qubitID::Int = nothing)
+    return qubitID == nothing ? Qubit(rand(), zone) : Qubit(qubitID, zone)
+end
+
+"""
 Creates some ZoneInfoDesc objects.
 """
 function giveZoneInfo(nZones:: Int64;  invZone=false, giveNothing=false)::Array{ZoneInfoDesc}
