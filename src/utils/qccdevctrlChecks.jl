@@ -186,13 +186,13 @@ function isallowed_junction_transport(qdc :: QCCDevControl, t :: Time_t,
   end
 
   isnothing(junction) && 
-            opError("Current ion's position with ID $(currPos.idi) is not connected to a junction")
+            opError("Current ion's position with ID $(currPos.id) is not connected to a junction")
   destination.id ∈ junction.ends || 
             opError("Destination $(destination.id) is not connected to junction $(junction.id)")
   
   chain = currPos.zoneType === :loadingZone ? currPos.hole : nothing
   if isnothing(chain)
-    chain = junction.id === currPos.end0 ? first(currPos.chain) : last(currPos,chain)
+    chain = junction.id === currPos.end0 ? first(currPos.chain) : last(currPos.chain)
   end
 
   if chain != ion_idx && chain != [ion_idx]
