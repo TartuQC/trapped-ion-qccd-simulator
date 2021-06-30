@@ -6,8 +6,8 @@
 using .QCCDevControl_Types
 
 """
-Helper function for `linear_transport()` and `junction_transport()`.
-Removes the ion from its current xone, adds it to the destination zone,
+Helper function for `linear_transport()`.
+Removes the ion from its current zone, adds it to the destination zone,
 and sets `destination` attribute to `nothing` if it has arrived to its final destination.
 # Arguments
 * `qdc` - Device controller
@@ -33,6 +33,49 @@ function _move_ion(qdc ::QCCDevControl,ion_idx ::Int, destination_idx ::Symbol)
     destination.hole = ion.id
   else
     destination.end0 === origin.id ? pushfirst!(destination.chain, [ion.id]) : 
+                                    push!(destination.chain, [ion.id])
+  end
+  ion.position = destination.id
+
+  # Remove destination to ion if it has arrived to its destination
+  if ion.destination === destination.id 
+    ion.destination = nothing
+  end
+end
+
+"""
+Helper function for `junction_transport()`.
+Removes the ion from its current zone, adds it to the destination zone,
+and sets `destination` attribute to `nothing` if it has arrived to its final destination.
+# Arguments
+* `qdc` - Device controller
+* `ion_idx` - Id of the ion to be moved.
+* `destination_idx` - ID of the zone the ion is going to.
+"""
+function _move_ion_junction(qdc ::QCCDevControl,ion_idx ::Int, destination_idx ::Symbol)
+
+  ion = qdc.qubits[ion_idx]
+  origin = giveZone(qdc, ion.position)
+  destination = giveZone(qdc, destination_idx)
+
+  junction = get(qdc.junctions, origin.end0, nothing)
+  if isnothing(junction) || destination.id ∉ junction.ends
+    junction = get(qdc.junctions, origin.end1, nothing)
+  end
+
+  # Remove ion from origin
+  if origin.zoneType === :loadingZone
+    origin.hole = nothing
+  else
+    index = origin.end0 === junction.id ? 1 : length(origin.chain)
+    deleteat!(origin.chain, index)
+  end
+
+  # Add ion to destination and change its position
+  if destination.zoneType === :loadingZone
+    destination.hole = ion.id
+  else
+    destination.end0 === junction.id ? pushfirst!(destination.chain, [ion.id]) : 
                                     push!(destination.chain, [ion.id])
   end
   ion.position = destination.id

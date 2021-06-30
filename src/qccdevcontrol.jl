@@ -175,7 +175,7 @@ function junction_transport(qdc           :: QCCDevControl,
   
   # Remove ion from origin, insert it to destination,
   # and check if it has arrived to its destination
-  _move_ion(qdc, ion_idx, destination_idx)
+  _move_ion_junction(qdc, ion_idx, destination_idx)
 
   # Compute and update time
   local t₀ = compute_time(qdc, t, OperationTimes[:junction_transport])

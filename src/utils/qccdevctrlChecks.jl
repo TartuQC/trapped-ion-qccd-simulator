@@ -181,14 +181,14 @@ function isallowed_junction_transport(qdc :: QCCDevControl, t :: Time_t,
     _isallowed_common_linear_junction(qdc, t, ion_idx, destination_idx, :junction_transport)
   
   junction = get(qdc.junctions, currPos.end0, nothing)
-  if isnothing(junction)
+  if isnothing(junction) || destination.id ∉ junction.ends
     junction = get(qdc.junctions, currPos.end1, nothing)
   end
 
-  isnothing(junction) && 
-            opError("Current ion's position with ID $(currPos.id) is not connected to a junction")
-  destination.id ∈ junction.ends || 
-            opError("Destination $(destination.id) is not connected to junction $(junction.id)")
+  if isnothing(junction) || destination.id ∉ junction.ends
+    opError("Origin zone with ID $(currPos.id) and destination zone with ID " *
+              "$(destination.id) are not connected by a junction")
+  end
   
   chain = currPos.zoneType === :loadingZone ? currPos.hole : nothing
   if isnothing(chain)

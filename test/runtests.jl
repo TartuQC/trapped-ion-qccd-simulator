@@ -101,6 +101,13 @@ end
     @test isallowed_junction_transportFail4()
     @test isallowed_junction_transportFail5()
     @test isallowed_junction_transportFail6()
+    @test isallowed_junction_transportFail7()
+    @test isallowed_junction_transportFail8()
     @test isallowed_junction_transportGood()
     @test isallowed_junction_transportGoodLoad()
+    @test junctionTransportTestOK()
+    @test junctionTransportTest1()
+    @test junctionTransportTest2()
+    @test junctionTransportTest3()
+    @test junctionTransportTest4()
 end
