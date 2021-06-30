@@ -933,16 +933,30 @@ end
 # ========= swap function test =========
 function isallowedSplit_OK()
     qccd = giveQccCtrl()
+    ion1 = giveQubit(Symbol(1),rand(1:29))
+    qccd.qubits[ion1.id] = deepcopy(ion1)
+    push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
+    for i in 2:30
+        if i!= ion1.id
+            ion = giveQubit(Symbol(1),i)
+            qccd.qubits[ion.id] = deepcopy(ion)
+            push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
+        end
+    end
+    ion = rand(1:29)
+    isallowed_swap_split(qccd, ion, ion+1 , 10)
+end
+
+function split_ions_OK()
+    qccd = giveQccCtrl()
     ion1 = giveQubit(Symbol(1),1)
     qccd.qubits[ion1.id] = deepcopy(ion1)
-    ionsAdjacents = [1,50]
     push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
     for i in 2:30
         ion = giveQubit(Symbol(1),i)
         qccd.qubits[ion.id] = deepcopy(ion)
         push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
     end
-    ion = rand(1:29)
-    isallowed_swap_split(qccd, ion, ion+1 , 10)
+
 end
 # ========= END swap function test =========
