@@ -53,6 +53,7 @@ end
 
 @testset "Utils" begin
     @test giveZoneTest() 
+    @test generateAdjQubitsGZTest()
 end
 
 @testset "Time checks" begin

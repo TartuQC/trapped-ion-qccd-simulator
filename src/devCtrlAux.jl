@@ -76,16 +76,20 @@ Split the ions in the chain.
 """
 function _split_ions(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int)
   chain = giveZone(qdc, qdc.qubits[ion1_idx].position).chain
-  pos = nothing
+  pos1 = nothing
   index = nothing
-  for (num,i) in enumerate(chain)
-    pos = findall(x->x==ion1_idx, i)
+  # Finding position
+  for (_,i) in enumerate(chain)
+    pos1 = findall(x->x==ion1_idx, i)
     if !isempty(pos)
       index = i
       break
     end
   end
-
+  # Check which ion the last one
+  pos2 = findall(x->x==ion2_idx, index)
+  pos = pos1 > pos2 ? pos2 : pos1
+  # Split
   chain_split = chain[index][pos:end]
   map(x -> deleteat!(chain[index], x),collect(pos+1:length(chain[index])))
   insertat!(chain,index+1,chain_split)

@@ -681,7 +681,26 @@ end
 # ========= END linear_transport tests =========
 
 
-# ========= utils functions tests =========
+# ========= Test Utils test =========
+function generateAdjQubitsGZTest()
+    for i in 1:100
+        gccd = giveQccCtrl()
+        nChains = rand(5:5)
+        nIons = rand(29:29)
+        chain,ion1,ion2 = generateAdjQubitsGZ(gccd, nChains, nIons)
+        @assert 1 <= chain <= nChains
+        @assert ion1+1 == ion2 || ion1-1 == ion2
+        @assert nChains == length(gccd.gateZones[Symbol(1)].chain)
+        @assert chain <= length(gccd.gateZones[Symbol(1)].chain)
+        for i in 1:nChains
+            @assert nIons == length(gccd.gateZones[Symbol(1)].chain[i])
+        end
+        @assert ion1 in gccd.gateZones[Symbol(1)].chain[chain]
+        @assert ion2 in gccd.gateZones[Symbol(1)].chain[chain]
+    end
+    return true
+end
+
 function giveZoneTest()
     qdd::QCCDevControl = giveQccCtrl()
     
@@ -706,8 +725,7 @@ function giveZoneTest()
 
     return true
 end
-
-# ========= END utils functions tests =========
+# ========= END Test Utils test =========
 
 # ========= _time_check functiong test =========
 time_check_timeFailsTest() = qccdSimulator.QCCDev_Feasible._time_check( 10, 9, :load)
@@ -932,11 +950,22 @@ end
 
 # ========= swap function test =========
 function isallowedSplit_OK()
+    for i in 1:100
+        qccd = giveQccCtrl()
+        nChains = rand(5:5)
+        nIons = rand(29:29)
+        _,ion1,ion2 = generateAdjQubitsGZ(qccd, nChains, nIons)
+        isallowed_swap_split(qccd, ion1, ion2 , 10)
+    end
+    return true
+end
+
+function split_ions_OK()
     qccd = giveQccCtrl()
     ion1 = giveQubit(Symbol(1),rand(1:29))
     qccd.qubits[ion1.id] = deepcopy(ion1)
     push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
-    for i in 2:30
+    for i in 1:30
         if i!= ion1.id
             ion = giveQubit(Symbol(1),i)
             qccd.qubits[ion.id] = deepcopy(ion)
@@ -944,19 +973,10 @@ function isallowedSplit_OK()
         end
     end
     ion = rand(1:29)
-    isallowed_swap_split(qccd, ion, ion+1 , 10)
-end
-
-function split_ions_OK()
-    qccd = giveQccCtrl()
-    ion1 = giveQubit(Symbol(1),1)
-    qccd.qubits[ion1.id] = deepcopy(ion1)
-    push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
-    for i in 2:30
-        ion = giveQubit(Symbol(1),i)
-        qccd.qubits[ion.id] = deepcopy(ion)
-        push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
-    end
-
+    qccdSimulator.QCCDDevControl._split_ions(qccd, ion, ion+1)
+     
 end
 # ========= END swap function test =========
+
+
+# ========= END Test Utils test =========
