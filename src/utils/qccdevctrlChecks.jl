@@ -5,7 +5,7 @@
 
 module QCCDev_Feasible
 export load_checks, OperationNotAllowedException, isallowed_load, isallowed_swap_split
-export  isallowed_linear_transport
+export  isallowed_linear_transport, isallowed_junction_transport
 
 using ..QCCDevDes_Types
 using ..QCCDevControl_Types
@@ -103,7 +103,7 @@ Function `isallowed_linear_transport()` — checks feasibility of `linear_transp
 * Check time — Call _time_check function.
 * Check OperationTimes - Checks if time model is defined for `linear_transport`
 * Check ion_idx - Checks if ion is in the device.
-* Check destination_idx - Cehcks if destination zone is in the device.
+* Check destination_idx - Checks if destination zone is in the device.
 * Check ion position - Check if ion's position exists in the device.
 * Check ion chain - Checks if the ion is in the correct chain position to leave the device.
 * Check ends - Checks if ion position and destination are adjacent.
@@ -114,21 +114,8 @@ function isallowed_linear_transport(qdc           :: QCCDevControl,
                                     ion_idx       :: Int,
                                     destination_idx      :: Symbol)
 
-  _time_check(qdc.t_now, t, :linear_transport)
-
-  if ion_idx ∉ keys(qdc.qubits)
-    opError("Ion with ID $ion_idx is not in device")
-  end
-
-  destination = giveZone(qdc, destination_idx)
-  if isnothing(destination)
-    opError("Zone with ID $destination_idx is not in device")
-  end
-
-  currentPosition = giveZone(qdc, qdc.qubits[ion_idx].position)
-  if isnothing(currentPosition)
-    opError("Ion with ID $ion_idx is nowhere (?)")
-  end
+  destination, currentPosition = 
+    _isallowed_common_linear_junction(qdc, t, ion_idx, destination_idx, :linear_transport)
 
   chain = nothing
   if currentPosition.end0 == destination.id
@@ -144,7 +131,25 @@ function isallowed_linear_transport(qdc           :: QCCDevControl,
   end
 
   if chain != ion_idx && chain != [ion_idx]
-    opError("Ion $ion_idx can't leave the trap since it's not in the correct end position.")
+    opError("Ion $ion_idx isn't in the correct position or is not alone in the chain.")
+  end
+end
+
+function _isallowed_common_linear_junction(qdc :: QCCDevControl, t :: Time_t, ion_idx :: Int,
+          destination_idx :: Symbol, operation ::Symbol) ::NTuple{2, Union{GateZone, AuxZone, LoadingZone, Junction, Nothing}}
+
+  _time_check(qdc.t_now, t, operation)
+
+  if ion_idx ∉ keys(qdc.qubits)
+    opError("Ion with ID $ion_idx is not in device")
+  end
+  destination = giveZone(qdc, destination_idx)
+  if isnothing(destination)
+    opError("Zone with ID $destination_idx is not in device")
+  end
+  currentPosition = giveZone(qdc, qdc.qubits[ion_idx].position)
+  if isnothing(currentPosition)
+    opError("Ion with ID $ion_idx is nowhere (?)")
   end
 
   destinationIsLoadingZone = destination.zoneType == :loadingZone
@@ -153,6 +158,49 @@ function isallowed_linear_transport(qdc           :: QCCDevControl,
     sum(length, destination.chain) == destination.capacity)
     opError("Destination zone with ID $destination_idx cannot hold more ions.")
   end
+
+  return (destination, currentPosition)
 end
 
+"""
+Function `isallowed_junction_transport()` — checks feasibility of `junction_transport`.
+
+# Arguments: See `junction_transport`
+
+# checks
+* Check time — Call _time_check function.
+* Check OperationTimes - Checks if time model is defined for `junction_transport`
+* Check ion_idx - Checks if ion is in the device.
+* Check destination_idx - Checks if destination zone is in the device.
+* Check ion position - Check if ion's position exists in the device.
+* Check ion chain - Checks if the ion is in the correct chain position to leave the device.
+* Check ends - Checks if ion position and destination are adjacent (through a junction).
+* Check capacity - Checks if destination zone is not currently full.
+
+"""
+function isallowed_junction_transport(qdc :: QCCDevControl, t :: Time_t,
+                                      ion_idx :: Int, destination_idx :: Symbol)
+  destination, currPos = 
+    _isallowed_common_linear_junction(qdc, t, ion_idx, destination_idx, :junction_transport)
+  
+  junction = get(qdc.junctions, currPos.end0, nothing)
+  if isnothing(junction) || destination.id ∉ junction.ends
+    junction = get(qdc.junctions, currPos.end1, nothing)
+  end
+
+  if isnothing(junction) || destination.id ∉ junction.ends
+    opError("Origin zone with ID $(currPos.id) and destination zone with ID " *
+              "$(destination.id) are not connected by a junction")
+  end
+  
+  chain = currPos.zoneType === :loadingZone ? currPos.hole : nothing
+  if isnothing(chain)
+    chain = junction.id === currPos.end0 ? first(currPos.chain) : last(currPos.chain)
+  end
+
+  if chain != ion_idx && chain != [ion_idx]
+    opError("Ion $ion_idx isn't in the correct position or is not alone in the chain.")
+  end
+
 end
+end 

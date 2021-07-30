@@ -104,6 +104,9 @@ function giveQccDes()::QCCDevDescription
     return  QCCDevDescription(gateZone,auxZone,junction,loadZone)
 end
 
+"""
+This one has a gate zone with capacity of 8
+"""
 function giveQccDes2()::QCCDevDescription
     gateZone:: GateZoneDesc = GateZoneDesc(
         [ 
@@ -128,6 +131,79 @@ function giveQccDes2()::QCCDevDescription
     loadZone:: LoadZoneDesc = LoadZoneDesc(
         [ 
             LoadZoneInfoDesc( "8", "3", "")
+        ]
+    )
+    return  QCCDevDescription(gateZone,auxZone,junction,loadZone)
+end
+
+"""
+This one has some loading zones connected to junction
+"""
+function giveQccDes3()::QCCDevDescription
+    gateZone:: GateZoneDesc = GateZoneDesc(
+        [ 
+            ZoneInfoDesc("1", "", "4", 2),
+            ZoneInfoDesc("2", "4", "5", 2),
+            ZoneInfoDesc( "3", "7", "8", 2)
+        ]
+    )
+    auxZone:: AuxZoneDesc = AuxZoneDesc(
+        [ 
+            ZoneInfoDesc( "4", "1", "2", 2),
+            ZoneInfoDesc( "5", "", "9", 2),
+            ZoneInfoDesc( "6", "9", "", 2),
+            ZoneInfoDesc( "7", "9", "3", 2)
+        ]
+    )
+    junction:: JunctionDesc = JunctionDesc(
+        [
+            JunctionInfoDesc( "9", "T"),
+            JunctionInfoDesc( "10", "T")
+        ]
+    )
+    loadZone:: LoadZoneDesc = LoadZoneDesc(
+        [ 
+            LoadZoneInfoDesc( "8", "3", ""),
+            LoadZoneInfoDesc( "11", "10", ""),
+            LoadZoneInfoDesc( "12", "10", ""),
+            LoadZoneInfoDesc( "13", "", "10")
+        ]
+    )
+    return  QCCDevDescription(gateZone,auxZone,junction,loadZone)
+end
+
+"""
+This one has every zone type connected to a junction.
+It also has an Aux zone connected to 2 junctions.
+"""
+function giveQccDes4()::QCCDevDescription
+    gateZone:: GateZoneDesc = GateZoneDesc(
+        [ 
+            ZoneInfoDesc("1", "", "4", 2),
+            ZoneInfoDesc("2", "4", "5", 2),
+            ZoneInfoDesc( "3", "7", "8", 2),
+            ZoneInfoDesc( "13", "", "10",2)
+        ]
+    )
+    auxZone:: AuxZoneDesc = AuxZoneDesc(
+        [ 
+            ZoneInfoDesc( "4", "1", "2", 2),
+            ZoneInfoDesc( "5", "", "9", 2),
+            ZoneInfoDesc( "7", "9", "3", 2),
+            ZoneInfoDesc( "12", "9", "10",2),
+            ZoneInfoDesc( "14", "10", "9",2)
+        ]
+    )
+    junction:: JunctionDesc = JunctionDesc(
+        [
+            JunctionInfoDesc( "9", "X"),
+            JunctionInfoDesc( "10", "X")
+        ]
+    )
+    loadZone:: LoadZoneDesc = LoadZoneDesc(
+        [ 
+            LoadZoneInfoDesc( "8", "3", ""),
+            LoadZoneInfoDesc( "11", "10", "")
         ]
     )
     return  QCCDevDescription(gateZone,auxZone,junction,loadZone)
@@ -222,8 +298,20 @@ end
 """
 Creates a struct QCCDevControl based in the file giveQccDes()
 """
-function giveQccCtrl(;alternateDesc = false)::QCCDevControl
-    qccd::QCCDevDescription = alternateDesc ?  giveQccDes2() : giveQccDes()
+function giveQccCtrl(;alternateDesc = nothing)::QCCDevControl
+    qccd = nothing
+    if isnothing(alternateDesc)
+        qccd = giveQccDes()
+    else
+        if alternateDesc == 2
+            qccd = giveQccDes2()
+        elseif alternateDesc == 3
+            qccd = giveQccDes3()
+        elseif alternateDesc == 4
+            qccd = giveQccDes4()
+        end
+    end
+    
     gateZones = Dict{Symbol,GateZone}()
     endId = id -> id == "" ? nothing : Symbol(id)
     map(tr -> gateZones[Symbol(tr.id)] = GateZone(Symbol(tr.id), tr.capacity,

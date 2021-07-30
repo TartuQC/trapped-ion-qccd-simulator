@@ -14,7 +14,7 @@ function readTimeJSONOK(path ::String)
     readTimeJSON(path)
     @assert OperationTimes[:load] == 5
     @assert OperationTimes[:linear_transport] == 78
-    @assert OperationTimes[:loadingHole_transport] == 35
+    @assert OperationTimes[:junction_transport] == 35
     @assert OperationTimes[:swap] == 2
     @assert OperationTimes[:split] == 55
     return true
@@ -592,7 +592,7 @@ function isallowedLinearTransportTestFull()
     dest = Symbol(3)
         
     # "Load" ion
-    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=true)
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=2)
     qdd.qubits[1] = Qubit(1,Symbol(8))
     qdd.loadingZones[Symbol(8)].hole = 1
 
@@ -615,7 +615,7 @@ function isallowedLinearTransportTestBlockedEnd0()
     origin = Symbol(3)
         
     # "Load" ion
-    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=true)
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=2)
     qdd.qubits[1] = Qubit(1,origin)
     halvedCapacity = floor(Int64, qdd.gateZones[origin].capacity / 2)
     push!(qdd.gateZones[origin].chain, rand(2:100, halvedCapacity), [1])
@@ -625,7 +625,7 @@ function isallowedLinearTransportTestBlockedEnd0()
     try
         isallowed_linear_transport(qdd, qdd.t_now+1, 1, Symbol(7)) 
     catch e
-        @assert endswith(e.msg,"not in the correct end position.")
+        @assert endswith(e.msg,"isn't in the correct position or is not alone in the chain.")
         return true
     end
     return false
@@ -635,7 +635,7 @@ function isallowedLinearTransportTestBlockedEnd1()
     origin = Symbol(3)
         
     # "Load" ion
-    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=true)
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=2)
     qdd.qubits[1] = Qubit(1,origin)
     halvedCapacity = floor(Int64, qdd.gateZones[origin].capacity / 2)
     push!(qdd.gateZones[origin].chain, rand(2:100, halvedCapacity), [1])
@@ -645,7 +645,7 @@ function isallowedLinearTransportTestBlockedEnd1()
     try
         isallowed_linear_transport(qdd, qdd.t_now+1, 1, Symbol(8)) 
     catch e
-        @assert endswith(e.msg,"not in the correct end position.")
+        @assert endswith(e.msg,"isn't in the correct position or is not alone in the chain.")
         return true
     end
     return false
@@ -655,7 +655,7 @@ function isallowedLinearTransportTestNotBlockedEnd0()
     origin = Symbol(3)
         
     # "Load" ion
-    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=true)
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=2)
     qdd.qubits[1] = Qubit(1,origin)
     halvedCapacity = floor(Int64, qdd.gateZones[origin].capacity / 2)
     push!(qdd.gateZones[origin].chain,[1], rand(2:100, halvedCapacity))
@@ -669,7 +669,7 @@ function isallowedLinearTransportTestNotBlockedEnd1()
     origin = Symbol(3)
         
     # "Load" ion
-    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=true)
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc=2)
     qdd.qubits[1] = Qubit(1,origin)
     halvedCapacity = floor(Int64, qdd.gateZones[origin].capacity / 2)
     push!(qdd.gateZones[origin].chain, rand(2:100, halvedCapacity))
@@ -986,5 +986,266 @@ function split_ions_OK()
 end
 # ========= END Split function test =========
 
+# ========= Junction transport test =========
 
-# ========= END Test Utils test =========
+# Load to Load
+function junctionTransportTestOK()
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc = 3)
+    qdd.qubits[1] = Qubit(1,Symbol(11))
+    qdd.loadingZones[Symbol(11)].hole = 1
+
+    t = qccdSimulator.QCCDDevControl.junction_transport(qdd, 10, 1, Symbol(12))
+    @assert OperationTimes[:junction_transport] == 35
+    @assert t == 45
+    @assert qdd.t_now == 45
+    @assert qdd.qubits[1].position === Symbol(12)
+    @assert isnothing(qdd.loadingZones[Symbol(11)].hole)
+    @assert qdd.loadingZones[Symbol(12)].hole == 1
+    return true
+end
+
+# Gate to Aux
+function junctionTransportTest1()
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc = 4)
+    qdd.qubits[1] = Qubit(1,Symbol(13))
+    qdd.qubits[1].status = :inGateZone
+    qdd.qubits[1].destination = Symbol(12)
+
+    append!(qdd.gateZones[Symbol(13)].chain, [[2],[1]])
+    append!(qdd.auxZones[Symbol(12)].chain, [[3]])
+    t = qccdSimulator.QCCDDevControl.junction_transport(qdd, 10, 1, Symbol(12))
+    @assert OperationTimes[:junction_transport] == 35
+    @assert t == 45
+    @assert qdd.t_now == 45
+    @assert qdd.qubits[1].position === Symbol(12)
+    @assert qdd.gateZones[Symbol(13)].chain == [[2]]
+    @assert qdd.auxZones[Symbol(12)].chain == [[3], [1]]
+    @assert isnothing(qdd.qubits[1].destination)
+
+    return true
+end
+
+# Gate to load
+function junctionTransportTest2()
+    qdd::QCCDevControl = giveQccCtrl(;alternateDesc = 4)
+    qdd.qubits[1] = Qubit(1,Symbol(13))
+    qdd.qubits[1].status = :inGateZone
+    qdd.qubits[1].destination = Symbol(7)
+
+    append!(qdd.gateZones[Symbol(13)].chain, [[2],[1]])
+    t = qccdSimulator.QCCDDevControl.junction_transport(qdd, 10, 1, Symbol(11))
+    @assert OperationTimes[:junction_transport] == 35
+    @assert t == 45
+    @assert qdd.t_now == 45
+    @assert qdd.qubits[1].position === Symbol(11)
+    @assert qdd.gateZones[Symbol(13)].chain == [[2]]
+    @assert qdd.loadingZones[Symbol(11)].hole == 1
+    @assert qdd.qubits[1].destination == Symbol(7)
+
+    return true
+end
+
+# Aux to Gate
+function junctionTransportTest3()
+    qdd ::QCCDevControl = giveQccCtrl(;alternateDesc = 4)
+    qdd.qubits[1] = Qubit(1,Symbol(14))
+    qdd.qubits[1].status = :inGateZone
+
+    append!(qdd.gateZones[Symbol(13)].chain, [[2]])
+    append!(qdd.auxZones[Symbol(14)].chain, [[1], [3]])
+    t = qccdSimulator.QCCDDevControl.junction_transport(qdd, 10, 1, Symbol(13))
+    @assert OperationTimes[:junction_transport] == 35
+    @assert t == 45
+    @assert qdd.t_now == 45
+    @assert qdd.qubits[1].position === Symbol(13)
+    @assert qdd.gateZones[Symbol(13)].chain == [[2], [1]]
+    @assert qdd.auxZones[Symbol(14)].chain == [[3]]
+
+    return true
+end
+
+# Aux to Gate
+function junctionTransportTest4()
+    qdd ::QCCDevControl = giveQccCtrl(;alternateDesc = 4)
+    qdd.qubits[1] = Qubit(1,Symbol(14))
+    qdd.qubits[1].status = :inGateZone
+
+    append!(qdd.auxZones[Symbol(7)].chain, [[2]])
+    append!(qdd.auxZones[Symbol(14)].chain, [[3], [1]])
+    t = qccdSimulator.QCCDDevControl.junction_transport(qdd, 10, 1, Symbol(7))
+    @assert OperationTimes[:junction_transport] == 35
+    @assert t == 45
+    @assert qdd.t_now == 45
+    @assert qdd.qubits[1].position === Symbol(7)
+    @assert qdd.auxZones[Symbol(7)].chain == [[1], [2]]
+    @assert qdd.auxZones[Symbol(14)].chain == [[3]]
+
+    return true
+end
+
+function isallowed_junction_transportFail1()
+    qccd = giveQccCtrl()
+    ion = giveQubit(Symbol(1),1)
+    qccd.qubits[ion.id] = ion
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(2)) 
+    catch e
+        @assert e.msg == "Origin zone with ID 1 and destination zone with ID " *
+                            "2 are not connected by a junction"
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail2()
+    qccd = giveQccCtrl()
+    ion = giveQubit(Symbol(5),1)
+    qccd.qubits[ion.id] = ion
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(1)) 
+    catch e
+        @assert e.msg == "Origin zone with ID 5 and destination zone with ID " *
+                            "1 are not connected by a junction"
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail3()
+    qccd = giveQccCtrl()
+    origin = Symbol(6)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [2])
+    push!(qccd.auxZones[origin].chain, [1])
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(7)) 
+    catch e
+        @assert e.msg == "Ion 1 isn't in the correct position or is not alone in the chain."
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail4()
+    qccd = giveQccCtrl()
+    origin = Symbol(6)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [1,2])
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(5)) 
+    catch e
+        @assert e.msg == "Ion 1 isn't in the correct position or is not alone in the chain."
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail5()
+    qccd = giveQccCtrl()
+    origin = Symbol(5)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [1,2])
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(6)) 
+    catch e
+        @assert e.msg == "Ion 1 isn't in the correct position or is not alone in the chain."
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail6()
+    qccd = giveQccCtrl()
+    origin = Symbol(5)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [1])
+    push!(qccd.auxZones[origin].chain, [2])
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(6)) 
+    catch e
+        @assert e.msg == "Ion 1 isn't in the correct position or is not alone in the chain."
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail7()
+    qccd = giveQccCtrl(;alternateDesc = 4)
+    origin = Symbol(14)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [1])
+    push!(qccd.auxZones[origin].chain, [2])
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(7)) 
+    catch e
+        @assert e.msg == "Ion 1 isn't in the correct position or is not alone in the chain."
+        return true
+    end
+    return false
+end
+
+function isallowed_junction_transportFail8()
+    qccd = giveQccCtrl(;alternateDesc = 4)
+    origin = Symbol(14)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [2])
+    push!(qccd.auxZones[origin].chain, [1])
+    try
+        isallowed_junction_transport(qccd, 10, 1, Symbol(13)) 
+    catch e
+        @assert e.msg == "Ion 1 isn't in the correct position or is not alone in the chain."
+        return true
+    end
+    return false
+end
+
+
+function isallowed_junction_transportGood()
+    qccd = giveQccCtrl()
+    origin = Symbol(5)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [2])
+    push!(qccd.auxZones[origin].chain, [1])
+    isallowed_junction_transport(qccd, 10, 1, Symbol(6))
+
+    origin = Symbol(6)
+    ion = giveQubit(origin,2)
+    qccd.qubits[ion.id] = ion
+    push!(qccd.auxZones[origin].chain, [2])
+    push!(qccd.auxZones[origin].chain, [1])
+    isallowed_junction_transport(qccd, 10, 2, Symbol(7))
+    return true
+end
+
+function isallowed_junction_transportGoodLoad()
+    qccd = giveQccCtrl(;alternateDesc=3)
+    origin = Symbol(11)
+    ion = giveQubit(origin,1)
+    qccd.qubits[ion.id] = ion
+    qccd.loadingZones[origin].hole = ion.id
+    
+    isallowed_junction_transport(qccd, 10, 1, Symbol(12))
+
+    origin = Symbol(13)
+    ion = giveQubit(origin,2)
+    qccd.qubits[ion.id] = ion
+    qccd.loadingZones[origin].hole = ion.id
+    isallowed_junction_transport(qccd, 10, 2, Symbol(12))
+
+    origin = Symbol(12)
+    ion = giveQubit(origin,3)
+    qccd.qubits[ion.id] = ion
+    qccd.loadingZones[origin].hole = ion.id
+    qccd.loadingZones[Symbol(11)].hole = nothing
+    isallowed_junction_transport(qccd, 10, 3, Symbol(11))
+
+    return true
+end
+# ========= END Junction transport test =========

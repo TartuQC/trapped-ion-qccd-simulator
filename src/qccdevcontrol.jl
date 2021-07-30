@@ -116,7 +116,7 @@ function load(qdc           ::QCCDevControl,
   qdc.qubits[qubit.id] = deepcopy(qubit)
   qdc.loadingZones[loading_zone].hole = qubit.id
   
-  # Compute and actualize time
+  # Compute and update time
   local t₀ = compute_time(qdc, t, OperationTimes[:load])
   
   return (new_ion_idx=qubit.id, t₀)
@@ -132,7 +132,7 @@ Function `linear_transport()` — moves ions between zones/junctions.
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 * `ion_idx`   — index (1-based) of ion to be moved.
-* `edge-idx`  — index (1-based) of edge to move along.
+* `edge-idx`  — index (1-based) of destination zone.
 
 The function returns the time at which the operation will be completed.
 """
@@ -144,15 +144,11 @@ function linear_transport(qdc           :: QCCDevControl,
   # Checks  
   isallowed_linear_transport(qdc, t, ion_idx, destination_idx)
 
-  ion = qdc.qubits[ion_idx]
-  origin = giveZone(qdc, ion.position)
-  destination = giveZone(qdc, destination_idx)
-
   # Remove ion from origin, insert it to destination,
   # and check if it has arrived to its destination
-  _move_ion(ion, origin, destination)
+  _move_ion(qdc, ion_idx, destination_idx)
 
-  # Compute and actualize time
+  # Compute and update time
   local t₀ = compute_time(qdc, t, OperationTimes[:linear_transport])
 
   return t₀
@@ -167,15 +163,25 @@ Function `junction_transport()` — moves around a junction.
 * `t::Time_t` — time at which the operation commences.  Must be no earlier than the latest time
   given to previous function calls.
 * `ion_idx`   — index (1-based) of ion to be moved.
-* `edge_idx` — index (1-based) of edge identifying the edge on which the ion leaves the junction.
+* `edge_idx` — index (1-based) of destination zone.
 
 The function returns the time at which the operation will be completed.
 """
 function junction_transport(qdc           :: QCCDevControl,
                             t             :: Time_t,
                             ion_idx       :: Int,
-                            edge_idx      :: Int       ) ::Time_t
-    
+                            destination_idx      :: Symbol       ) ::Time_t
+  # Checks
+  isallowed_junction_transport(qdc, t, ion_idx, destination_idx)
+  
+  # Remove ion from origin, insert it to destination,
+  # and check if it has arrived to its destination
+  _move_ion_junction(qdc, ion_idx, destination_idx)
+
+  # Compute and update time
+  local t₀ = compute_time(qdc, t, OperationTimes[:junction_transport])
+
+  return t₀
 end
 
 
@@ -202,7 +208,7 @@ function swap(qdc           :: QCCDevControl,
   # Swap qubits
   _swap_ions(qdc, ion1_idx, ion2_idx)
 
-  # Compute and actualize time
+  # Compute and update time
   local t₀ = compute_time(qdc, t, OperationTimes[:swap])
 
   return t₀
