@@ -79,20 +79,20 @@ function _split_ions(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int)
   pos1 = nothing
   index = nothing
   # Finding position
-  for (_,i) in enumerate(chain)
-    pos1 = findall(x->x==ion1_idx, i)
-    if !isempty(pos)
-      index = i
+  for (j,i) in enumerate(chain)
+    pos1 = findall(x->x==ion1_idx, i)[1]
+    if !isempty(pos1)
+      index = j
       break
     end
   end
-  # Check which ion the last one
-  pos2 = findall(x->x==ion2_idx, index)
-  pos = pos1 > pos2 ? pos2 : pos1
+  # Check which ion is the last one
+  pos2 = findall(x->x==ion2_idx, chain[index])[1]
+  pos = pos1 > pos2 ? pos1 : pos2
   # Split
   chain_split = chain[index][pos:end]
-  map(x -> deleteat!(chain[index], x),collect(pos+1:length(chain[index])))
-  insertat!(chain,index+1,chain_split)
+  filter!(x -> x ∉ collect(chain_split),chain[index])
+  insert!(chain,index+1,chain_split)
 end
 
 """

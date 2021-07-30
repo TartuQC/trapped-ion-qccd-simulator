@@ -5,6 +5,7 @@
 
 module QCCDDevControl
 
+using LightGraphs: length
 export QCCDevCtrl
 
 using ..QCCDevDes_Types

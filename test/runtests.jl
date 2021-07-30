@@ -95,6 +95,7 @@ end
     @test swap_OK2()
 end
 
-@testset "Swap & isallowed_swap_split" begin
+@testset "Split & isallowed_swap_split" begin
     @test isallowedSplit_OK()
+    @test split_ions_OK()
 end

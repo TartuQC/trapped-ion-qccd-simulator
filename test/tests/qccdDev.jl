@@ -948,7 +948,7 @@ function swap_OK2()
 end
 # ========= END swap function test =========
 
-# ========= swap function test =========
+# ========= Split function test =========
 function isallowedSplit_OK()
     for i in 1:100
         qccd = giveQccCtrl()
@@ -961,6 +961,7 @@ function isallowedSplit_OK()
 end
 
 function split_ions_OK()
+    index = 1
     qccd = giveQccCtrl()
     ion1 = giveQubit(Symbol(1),rand(1:29))
     qccd.qubits[ion1.id] = deepcopy(ion1)
@@ -972,11 +973,18 @@ function split_ions_OK()
             push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
         end
     end
-    ion = rand(1:29)
-    qccdSimulator.QCCDDevControl._split_ions(qccd, ion, ion+1)
-     
+    for i in 1:29
+        ion = rand(1:29)
+        qccdSimulator.QCCDDevControl._split_ions(qccd, ion, ion+1)
+        @assert length(qccd.gateZones[Symbol(1)].chain) == i + 1
+        tmp = rand(1:29)
+        while tmp == ion
+            tmp = rand(1:29)
+        end
+        ion = tmp
+    end
 end
-# ========= END swap function test =========
+# ========= END Split function test =========
 
 
 # ========= END Test Utils test =========
