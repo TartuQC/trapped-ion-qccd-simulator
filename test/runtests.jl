@@ -97,7 +97,8 @@ end
 
 @testset "Split & isallowed_swap_split" begin
     @test isallowedSplit_OK()
-    @test split_ions_OK()
+    @test split_ions_OK1()
+    @test split_ions_OK2()
 end
 @testset "Junction transport" begin
     @test isallowed_junction_transportFail1()

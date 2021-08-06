@@ -125,9 +125,10 @@ function _split_ions(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int)
   index = nothing
   # Finding position
   for (j,i) in enumerate(chain)
-    pos1 = findall(x->x==ion1_idx, i)[1]
+    pos1 = findall(x->x==ion1_idx, i)
     if !isempty(pos1)
       index = j
+      pos1 = pos1[1]
       break
     end
   end

@@ -960,29 +960,43 @@ function isallowedSplit_OK()
     return true
 end
 
-function split_ions_OK()
-    index = 1
+function split_ions_OK1()
     qccd = giveQccCtrl()
-    ion1 = giveQubit(Symbol(1),rand(1:29))
+    ion1 = giveQubit(Symbol(1),30)
     qccd.qubits[ion1.id] = deepcopy(ion1)
     push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
-    for i in 1:30
-        if i!= ion1.id
-            ion = giveQubit(Symbol(1),i)
-            qccd.qubits[ion.id] = deepcopy(ion)
-            push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
-        end
-    end
     for i in 1:29
-        ion = rand(1:29)
-        qccdSimulator.QCCDDevControl._split_ions(qccd, ion, ion+1)
-        @assert length(qccd.gateZones[Symbol(1)].chain) == i + 1
-        tmp = rand(1:29)
-        while tmp == ion
-            tmp = rand(1:29)
-        end
-        ion = tmp
+        ion = giveQubit(Symbol(1),i)
+        qccd.qubits[ion.id] = deepcopy(ion)
+        push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
     end
+    for i in 1:28
+        qccdSimulator.QCCDDevControl._split_ions(qccd, i, i+1)
+        @assert length(qccd.gateZones[Symbol(1)].chain) == i + 1
+        @assert length(qccd.gateZones[Symbol(1)].chain[i]) == 2 || 
+                length(qccd.gateZones[Symbol(1)].chain[i]) == 1
+        @assert i in qccd.gateZones[Symbol(1)].chain[i]
+    end
+    return true
+end
+
+function split_ions_OK2()
+    qccd = giveQccCtrl()
+    ion1 = giveQubit(Symbol(1),1)
+    qccd.qubits[ion1.id] = deepcopy(ion1)
+    push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
+    for i in 2:10
+        ion = giveQubit(Symbol(1),i)
+        qccd.qubits[ion.id] = deepcopy(ion)
+            push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
+    end
+    qccdSimulator.QCCDDevControl._split_ions(qccd, 6, 7)
+    @assert qccd.gateZones[Symbol(1)].chain == [[1,2,3,4,5,6],[7,8,9,10]]
+    qccdSimulator.QCCDDevControl._split_ions(qccd, 1, 2)
+    @assert qccd.gateZones[Symbol(1)].chain == [[1],[2,3,4,5,6],[7,8,9,10]]
+    qccdSimulator.QCCDDevControl._split_ions(qccd, 8, 9)
+    @assert qccd.gateZones[Symbol(1)].chain == [[1],[2,3,4,5,6],[7,8],[9,10]]
+    return true
 end
 # ========= END Split function test =========
 
