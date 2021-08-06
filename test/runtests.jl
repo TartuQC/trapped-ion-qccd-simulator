@@ -99,6 +99,7 @@ end
     @test isallowedSplit_OK()
     @test split_ions_OK1()
     @test split_ions_OK2()
+    @test split_OK()
 end
 @testset "Junction transport" begin
     @test isallowed_junction_transportFail1()

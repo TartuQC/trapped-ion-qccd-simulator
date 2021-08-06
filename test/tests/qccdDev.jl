@@ -998,6 +998,28 @@ function split_ions_OK2()
     @assert qccd.gateZones[Symbol(1)].chain == [[1],[2,3,4,5,6],[7,8],[9,10]]
     return true
 end
+
+function split_OK()
+    qccd = giveQccCtrl()
+    ion1 = giveQubit(Symbol(1),1)
+    qccd.qubits[ion1.id] = deepcopy(ion1)
+    push!(qccd.gateZones[Symbol(1)].chain, [ion1.id])
+    for i in 2:10
+        ion = giveQubit(Symbol(1),i)
+        qccd.qubits[ion.id] = deepcopy(ion)
+            push!(qccd.gateZones[Symbol(1)].chain[1], ion.id)
+    end
+    qccdSimulator.QCCDDevControl.split(qccd, 2, 6, 7)
+    @assert qccd.gateZones[Symbol(1)].chain == [[1,2,3,4,5,6],[7,8,9,10]]
+    @assert qccd.t_now == 57
+    qccdSimulator.QCCDDevControl.split(qccd, qccd.t_now, 1, 2)
+    @assert qccd.gateZones[Symbol(1)].chain == [[1],[2,3,4,5,6],[7,8,9,10]]
+    @assert qccd.t_now == 57+55
+    qccdSimulator.QCCDDevControl.split(qccd, qccd.t_now, 8, 9)
+    @assert qccd.gateZones[Symbol(1)].chain == [[1],[2,3,4,5,6],[7,8],[9,10]]
+    @assert qccd.t_now == 57+55*2
+    return true
+end
 # ========= END Split function test =========
 
 # ========= Junction transport test =========

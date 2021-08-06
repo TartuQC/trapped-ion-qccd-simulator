@@ -236,6 +236,9 @@ function split(qdc           :: QCCDevControl,
   # Checks
   isallowed_swap_split(qdc, ion1_idx, ion2_idx, t; split=true)
 
+  # Split ions 
+  _split_ions(qdc, ion1_idx, ion2_idx)
+
   # Compute and actualize time
   local t₀ = compute_time(qdc, t, OperationTimes[:split])
 
