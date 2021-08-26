@@ -116,8 +116,8 @@ Helper function for `split()`.
 Split the ions in the chain.
 # Arguments
 * `qdc` - Control device struct.
-* `ion1_idx` - First ion to be splitten.
-* `ion2_idx` - Second ion to be splitten.
+* `ion1_idx` - First ion to split.
+* `ion2_idx` - Second ion to split.
 """
 function _split_ions(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int)
   chain = giveZone(qdc, qdc.qubits[ion1_idx].position).chain
