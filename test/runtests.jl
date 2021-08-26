@@ -53,6 +53,7 @@ end
 
 @testset "Utils" begin
     @test giveZoneTest() 
+    @test generateAdjQubitsGZTest()
 end
 
 @testset "Time checks" begin
@@ -73,7 +74,7 @@ end
     @test loadOKTest()
 end 
 
-@testset "Swap & isallowed_swap" begin
+@testset "Swap & isallowed_swap_split" begin
     @test_throws OperationNotAllowedException("Qubit with id 99" *
                                               " doesn't exist.") isallowedSwap_qubitNotExist()
     @test_throws OperationNotAllowedException("Qubits with ids 1  " *
@@ -94,6 +95,12 @@ end
     @test swap_OK2()
 end
 
+@testset "Split & isallowed_swap_split" begin
+    @test isallowedSplit_OK()
+    @test split_ions_OK1()
+    @test split_ions_OK2()
+    @test split_OK()
+end
 @testset "Junction transport" begin
     @test isallowed_junction_transportFail1()
     @test isallowed_junction_transportFail2()

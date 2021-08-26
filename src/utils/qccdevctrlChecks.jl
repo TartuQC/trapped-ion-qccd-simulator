@@ -4,7 +4,7 @@
 # Sub-module QCCDevCtrl
 
 module QCCDev_Feasible
-export load_checks, OperationNotAllowedException, isallowed_load, isallowed_swap
+export load_checks, OperationNotAllowedException, isallowed_load, isallowed_swap_split
 export  isallowed_linear_transport, isallowed_junction_transport
 
 using ..QCCDevDes_Types
@@ -57,13 +57,14 @@ function isallowed_load(qdc::QCCDevControl, loading_zone::Symbol, t::Time_t)
 end
 
 """
-Function `isallowed_swap()` — checks if load operation is posisble
+Function `isallowed_swap_split()` — checks if load/split operation is posisble
 
 # Arguments
 * `qdc::QCCDevControl` — Actual device's status.
 * `ion𝑖_idx`, 𝑖=1,2, the (1-based) indices of the two ions.  Must be in the same gate zone.
 * `t::Time_t` — Time at which the operation commences.  Must be no earlier than the latest time
                 given to previous function calls.
+* `split::Boolean` — Checks for the split (True: Split, False: Swap)
 # checks
 * Check time — Call _time_check function.
 * Check if two ions exists
@@ -71,8 +72,10 @@ Function `isallowed_swap()` — checks if load operation is posisble
 * check if ions are in same chain and are adjacents
 * Check if chain is in a gate zone
 """
-function isallowed_swap(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int , t::Time_t)
-    _time_check(qdc.t_now, t, :load)
+function isallowed_swap_split(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int,
+                             t::Time_t; split::Bool = false)
+    check = split ? :split : :load
+    _time_check(qdc.t_now, t, check)
     haskey(qdc.qubits, ion1_idx) || opError("Qubit with id $ion1_idx doesn't exist.")
     haskey(qdc.qubits, ion2_idx) || opError("Qubit with id $ion2_idx doesn't exist.")
     qdc.qubits[ion1_idx].position == qdc.qubits[ion2_idx].position || 

@@ -112,6 +112,36 @@ function _swap_ions(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int)
 end
 
 """
+Helper function for `split()`.
+Split the ions in the chain.
+# Arguments
+* `qdc` - Control device struct.
+* `ion1_idx` - First ion to split.
+* `ion2_idx` - Second ion to split.
+"""
+function _split_ions(qdc::QCCDevControl, ion1_idx:: Int, ion2_idx:: Int)
+  chain = giveZone(qdc, qdc.qubits[ion1_idx].position).chain
+  pos1 = nothing
+  index = nothing
+  # Finding position
+  for (j,i) in enumerate(chain)
+    pos1 = findall(x->x==ion1_idx, i)
+    if !isempty(pos1)
+      index = j
+      pos1 = pos1[1]
+      break
+    end
+  end
+  # Check which ion is the last one
+  pos2 = findall(x->x==ion2_idx, chain[index])[1]
+  pos = pos1 > pos2 ? pos1 : pos2
+  # Split
+  chain_split = chain[index][pos:end]
+  filter!(x -> x ∉ collect(chain_split),chain[index])
+  insert!(chain,index+1,chain_split)
+end
+
+"""
 Helper function to compute the time and actualize time in the control device.
 # Arguments
 * `qdc` - Control device struct.
